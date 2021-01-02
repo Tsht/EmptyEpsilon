@@ -83,9 +83,12 @@ void BlackHole::collide(Collisionable* target, float collision_force)
                 target->destroy();
         }
     }
-    if (force > 100.0 && isServer())
+    if (obj && force > 100.0 && isServer())
     {
         obj->takeDamage(force * update_delta / 10.0f, info);
     }
-    target->setPosition(target->getPosition() + diff / distance * update_delta * force);
+    if(target)
+    {
+        target->setPosition(target->getPosition() + diff / distance * update_delta * force);
+    }
 }
