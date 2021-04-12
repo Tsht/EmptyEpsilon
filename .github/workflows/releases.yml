@@ -9,8 +9,8 @@ on:
 jobs:
   build-linux:
     name: Linux Tagged Release Build
-      runs-on: ubuntu-latest
-      steps:
+    runs-on: ubuntu-latest
+    steps:
       - name: Update apt index
         run: sudo apt-get update -qq
       - name: Instal SFML
@@ -21,36 +21,36 @@ jobs:
         run: docker/build.sh
   build-windows:
     name: Windows (Cross-Compile) Tagged Release Build
-      runs-on: ubuntu-latest
-      steps:
-        - name: Dependencies
-          run: |
-            sudo apt update -qq
-            sudo apt install build-essential cmake python3-minimal mingw-w64 ninja-build p7zip-full
-        - name: SeriousProton Checkout
-          uses: actions/checkout@v2
-          with:
-            repository: tsht/SeriousProton
-            path: SeriousProton  
-        - name: EmptyEpsilon Checkout
-          uses: actions/checkout@v2
-          with:
-            path: EmptyEpsilon
-        - name: Build
-          run: |
-            mkdir -p _build_win32
-            cd _build_win32
-            cmake ../EmptyEpsilon -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_TOOLCHAIN_FILE=../EmptyEpsilon/cmake/mingw_ubuntu.toolchain -DSERIOUS_PROTON_DIR=../SeriousProton
-            ninja package
-            cd .. 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dependencies
+        run: |
+          sudo apt update -qq
+          sudo apt install build-essential cmake python3-minimal mingw-w64 ninja-build p7zip-full
+      - name: SeriousProton Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: tsht/SeriousProton
+          path: SeriousProton  
+      - name: EmptyEpsilon Checkout
+        uses: actions/checkout@v2
+        with:
+          path: EmptyEpsilon
+      - name: Build
+        run: |
+          mkdir -p _build_win32
+          cd _build_win32
+          cmake ../EmptyEpsilon -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_TOOLCHAIN_FILE=../EmptyEpsilon/cmake/mingw_ubuntu.toolchain -DSERIOUS_PROTON_DIR=../SeriousProton
+          ninja package
+          cd .. 
   tagged-release-update:
     name: "Tagged Release"
-      runs-on: "ubuntu-latest"
-      steps:
-        - uses: "marvinpinto/action-automatic-releases@latest"
-          with:
-            repo_token: "${{ secrets.GITHUB_TOKEN }}"
-            prerelease: false
-            files: |
-              EmptyEpsilon/*.zip
-              EmptyEpsilon/*.deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            EmptyEpsilon/*.zip
+            EmptyEpsilon/*.deb
