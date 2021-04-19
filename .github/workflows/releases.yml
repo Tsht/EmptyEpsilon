@@ -38,7 +38,7 @@ jobs:
           path: _build_linux/*.deb
   build-windows:
     name: Windows (Cross-Compile) Tagged Release Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Dependencies
         run: |
