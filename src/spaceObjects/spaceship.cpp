@@ -1955,6 +1955,11 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_Drones:
         return true;
     case SYS_Docks:
+        if(ship_template && (ship_template->squadrons_compositions.size() > 0))
+        {
+            return true;
+        }
+        [[fallthrough]];
     case SYS_Hangar:
         return docks[0].dock_type != Dock_Disabled;
     }
