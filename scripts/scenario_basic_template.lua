@@ -29,12 +29,83 @@ onNewShip(
 )
 
 
+-- a tester
 onNewPlayerShip(
 	function(pc)
 		doOnNewPlayerShip(pc)
+		print("!!")
+		print("beep boop")
+	pc:registerModifier("comp", "recup_energie", "activated")
+	pc:onModifierToggle(function(pc,name,state)
+	print(name)
+	print(state)
+--		if((name == "recup_energie") and (state == "activated")) then
+--			pc:setSystemPowerFactor("reactor", -35)
+--		elseif ((name == "recup_energie") and (state == "deactivated")) then
+	--		pc:setSystemPowerFactor("reactor", -30)
+--		end
+		end)
 	end
-
 )
+	
+
+
+--	pc:registerModifier("comp", "manoeuvre", "activated")
+--[[	pc:onModifierToggle(function(pc,name,state) -- ne fonctionne pas pour le moment - cyv
+		print(name)
+		print(state)
+		if((name == "manoeuvre") and (state == "activated")) then
+			pc:setCombatManeuver(600, 250)
+		elseif ((name == "manoeuvre") and (state == "deactivated")) then
+			pc:setCombatManeuver(500, 200)
+		end
+	end)
+	pc:registerModifier("comp", "Turn_rate", "activated")
+
+	pc:onModifierToggle(function(pc,name,state)-- ne fonctionne pas pour le moment - cyv
+		print(name)
+		print(state)
+		if((name == "Turn_rate") and (state == "activated")) then
+			pc:setSpeed(85, 8, 8, 40, 8)
+		elseif ((name == "Turn_rate") and (state == "deactivated")) then
+			pc:setSpeed(85, 6, 8, 40, 8)
+		end
+	end)
+
+	pc:registerModifier("comp", "cloaking", "activated")
+	pc:onModifierToggle(function(pc,name,state) -- ne fonctionne pas pour le moment - cyv
+		print(name)
+		print(state)
+		if((name == "cloaking") and (state == "activated")) then
+			pc:setCloaking(true)
+		elseif ((name == "cloaking") and (state == "deactivated")) then
+			pc:setCloaking(false)
+		end
+	end)
+
+	pc:registerModifier("comp", "hacking", "activated")
+	pc:onModifierToggle(function(pc,name,state) -- ne fonctionne pas pour le moment - cyv
+		print(name)
+		print(state)
+		if((name == "hacking") and (state == "activated")) then
+			pc:setCanHack(true)
+		elseif ((name == "hacking") and (state == "deactivated")) then
+			pc:setCanHack(false)
+		end
+	end)
+
+	pc:registerModifier("comp", "shield regen", "activated")
+	pc:onModifierToggle(function(pc,name,state)-- ne fonctionne pas pour le moment - cyv
+		print(name)
+		print(state)
+		if((name == "shield regen") and (state == "activated")) then
+			pc:setShieldRechargeRate(70)
+		elseif ((name == "shield regen") and (state == "deactivated")) then
+			pc:setShieldRechargeRate(60)
+		end
+	end)
+end)
+]]--
 
 
 --- Initialize scenario.
