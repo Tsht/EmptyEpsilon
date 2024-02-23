@@ -382,6 +382,10 @@ void SpaceObject::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, 
 {
 }
 
+void SpaceObject::drawBeamArcsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation)
+{
+}
+
 void SpaceObject::destroy()
 {
     on_destroyed.call<void>(P<SpaceObject>(this));

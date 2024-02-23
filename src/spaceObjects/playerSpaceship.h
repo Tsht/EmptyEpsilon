@@ -661,6 +661,19 @@ public:
         return 1.0f - launch_delay[n] / launch_duration;
     }
 
+    bool isInSquadron(P<SpaceShip> &iSpaceship)
+    {
+        for(auto &sq : getLaunchedSquadrons())
+        {
+            for(auto &ship : sq.ships)
+            {
+                if(iSpaceship == ship)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     void commandOrderSquadronPosition(EAIOrder order, unsigned int idx, const glm::vec2& pos);
     void commandOrderSquadronTarget(EAIOrder order, unsigned int idx, P<SpaceObject>& obj);
     void orderSquadron(EAIOrder order, unsigned int idx, const glm::vec2& pos);

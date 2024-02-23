@@ -279,6 +279,8 @@ public:
      */
     virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
     virtual void drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
+    //Tsht
+    virtual void drawBeamArcsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation) override;
 
     virtual void update(float delta) override;
     virtual float getCloakingDegree();

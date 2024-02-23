@@ -669,7 +669,22 @@ void GuiRadarView::drawObjects(sp::RenderTarget& renderer)
         if (obj != *target_spaceship && rect.overlaps(object_rect))
         {
             if (obj->getTransparency() < 0.5f)
+            {
+                P<SpaceObject> spobj(obj);
+                P<SpaceShip> this_spaceship(spobj);
+                if(this_spaceship && (this_spaceship->docked_style != DockStyle::Internal))
+                {
+                    // Draw beam arcs on short-range radar only, and only for fully scanned
+                    // ships.
+                    if ((!long_range && (!my_spaceship || (this_spaceship->getScannedStateFor(my_spaceship) == SS_FullScan)))
+                        || (my_spaceship && show_squadron_beam_arcs && my_spaceship->isInSquadron(this_spaceship))
+                        )
+                    {
+                        obj->drawBeamArcsOnRadar(renderer, object_position_on_screen, getScale(), getViewRotation());
+                    }
+                }
                 obj->drawOnRadar(renderer, object_position_on_screen, getScale(), getViewRotation(), long_range);
+            }
             if (show_callsigns && obj->getCallSign() != "" && obj->getTransparency() < 0.2f && obj->getDockedStyle() != DockStyle::Internal)
                 renderer.drawText(sp::Rect(object_position_on_screen.x, object_position_on_screen.y - 15, 0, 0), obj->getCallSign(), sp::Alignment::Center, 15, bold_font);
         }

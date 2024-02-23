@@ -34,7 +34,7 @@ CicScreen::CicScreen(GuiContainer* owner, bool allow_comms)
     target_for_ai.setAllowWaypointSelection();
     radar = new GuiRadarView(this, "CIC_RADAR", 50000.0f, &targets_squadron, my_spaceship);
     //radar long range is only for two things : draw ship without beam arc etc. and set distance. This is hacky.
-    radar->longRange()->enableWaypoints()->enableCallsigns()->setStyle(GuiRadarView::Rectangular)->setFogOfWarStyle(GuiRadarView::FriendlysShortRangeFogOfWar);
+    radar->longRange()->enableWaypoints()->enableCallsigns()->enableSquadronBeamArcs()->setStyle(GuiRadarView::Rectangular)->setFogOfWarStyle(GuiRadarView::FriendlysShortRangeFogOfWar);
     radar->setAutoCentering(false);
     radar->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     radar->setCallbacks(

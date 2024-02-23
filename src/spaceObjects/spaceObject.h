@@ -261,6 +261,9 @@ public:
     virtual void draw3DTransparent() {}
     virtual void drawOnRadar(sp::RenderTarget& window, glm::vec2 position, float scale, float rotation, bool longRange);
     virtual void drawOnGMRadar(sp::RenderTarget& window, glm::vec2 position, float scale, float rotation, bool longRange);
+    //Tsht
+    virtual void drawBeamArcsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation);
+
     virtual void destroy() override;
 
     virtual void setCallSign(string new_callsign) { callsign = new_callsign; }

@@ -51,6 +51,7 @@ private:
     bool auto_distance = false;
     bool auto_center_on_my_ship{true};
     bool long_range{false};
+    bool show_squadron_beam_arcs{false};
     bool show_ghost_dots{false};
     bool show_waypoints{false};
     bool show_target_projection{false};
@@ -87,6 +88,7 @@ public:
     GuiRadarView* disableMissileTubeIndicators() { show_missile_tubes = false; return this; }
     GuiRadarView* enableCallsigns() { show_callsigns = true; return this; }
     GuiRadarView* disableCallsigns() { show_callsigns = false; return this; }
+    GuiRadarView* enableSquadronBeamArcs() { show_squadron_beam_arcs = true; return this;}
     GuiRadarView* showCallsigns(bool value) { show_callsigns = value; return this; }
     bool getCallsigns() { return show_callsigns; }
     GuiRadarView* enableHeadingIndicators() { show_heading_indicators = true; return this; }
