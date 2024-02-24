@@ -698,6 +698,10 @@ void GuiRadarView::drawObjects(sp::RenderTarget& renderer)
     if (target_spaceship)
     {
         auto object_position_on_screen = worldToScreen(target_spaceship->getPosition());
+        if(!long_range)
+        {
+            target_spaceship->drawBeamArcsOnRadar(renderer, object_position_on_screen, getScale(), getViewRotation());
+        }
         target_spaceship->drawOnRadar(renderer, object_position_on_screen, getScale(), getViewRotation(), long_range);
         if (long_range && show_callsigns && target_spaceship->getCallSign() != "")
             renderer.drawText(sp::Rect(object_position_on_screen.x, object_position_on_screen.y - 15, 0, 0), target_spaceship->getCallSign(), sp::Alignment::Center, 15, bold_font);
