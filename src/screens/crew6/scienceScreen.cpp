@@ -162,7 +162,7 @@ ScienceScreen::ScienceScreen(GuiContainer* owner, ECrewPosition crew_position)
     sidebar_pager->addEntry(tr("scienceTab", "Description"), "Description");
 
     // Add sidebar page for informations.
-    sidebar_pager->addEntry("Informations", "Informations");
+    sidebar_pager->addEntry(tr("scienceTab","Informations"), "Informations");
 
     // Default the pager to the first item.
     sidebar_pager->setSelectionIndex(0);
@@ -471,15 +471,15 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
 //
 //        if (ship)
 //        {
-//            if (!sidebar_pager->indexByValue("Tactique"))
-//                sidebar_pager->addEntry("Tactique", "Tactique");
-//            if (!sidebar_pager->indexByValue("Systemes"))
-//                sidebar_pager->addEntry("Systemes", "Systemes");
+//            if (!sidebar_pager->indexByValue("Tactical"))
+//                sidebar_pager->addEntry("Tactical", "Tactical");
+//            if (!sidebar_pager->indexByValue("Systems"))
+//                sidebar_pager->addEntry("Systems", "Systems");
 //        }
 //        else
 //        {
-//            sidebar_pager->removeEntry(sidebar_pager->indexByValue("Tactique"));
-//            sidebar_pager->removeEntry(sidebar_pager->indexByValue("Systemes"));
+//            sidebar_pager->removeEntry(sidebar_pager->indexByValue("Tactical"));
+//            sidebar_pager->removeEntry(sidebar_pager->indexByValue("Systems"));
 //        }
 //
 //        // De base, pas de sidebar
@@ -571,7 +571,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
 
             if (ship)
             {
-                if (sidebar_pager_selection == "Tactique")
+                if (sidebar_pager_selection == "Tactical")
                 {
                     info_shield_frequency->show();
                     info_beam_frequency->show();
@@ -581,7 +581,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
                         info_beam_frequency->setFrequency(ship->beam_frequency);
                     }
                 }
-                if (sidebar_pager_selection == "Systemes")
+                if (sidebar_pager_selection == "Systems")
                 {
                     for(int n = 0; n < SYS_COUNT; n++)
                     {
@@ -662,7 +662,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
 //            {
 //
 //                // Check sidebar pager state.
-//                if (sidebar_pager_selection == "Tactique")
+//                if (sidebar_pager_selection == "Tactical")
 //                {
 //                    info_shield_frequency->show();
 //                    info_beam_frequency->show();
@@ -675,7 +675,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
 //
 //                    info_description->hide();
 //                }
-//                else if (sidebar_pager_selection == "Systemes")
+//                else if (sidebar_pager_selection == "Systems")
 //                {
 //                    info_shield_frequency->hide();
 //                    info_beam_frequency->hide();

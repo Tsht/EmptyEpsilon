@@ -302,7 +302,7 @@ string getCrewPositionName(ECrewPosition position)
     case altRelay: return tr("station","Strategic Map");
     case commsOnly: return tr("station","Comms");
     case shipLog: return tr("station","Ship's Log");
-    //TODO reverifier tout ça
+    //TODO reverifier tout ca
     case tacticalRadar: return tr("station","Tactical Radar");
     case scienceRadar: return tr("station","Science Radar");
     case relayRadar: return tr("station","Relay Radar");
