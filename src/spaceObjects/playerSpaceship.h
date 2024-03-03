@@ -537,6 +537,17 @@ public:
         on_modifier_toggle = callback;
     }
 
+    bool isModifierActivated(string name)
+    {
+        if(auto iter = modifiers_to_data.find(name); iter != modifiers_to_data.end())
+        {
+            return iter->second.activated;
+        }
+        return false;
+    }
+
+
+
     void setMaxSquadrons(unsigned int max) { max_squadrons_in_flight = max;}
 
     void instantiateSquadron(const string& type);

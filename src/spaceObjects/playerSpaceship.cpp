@@ -488,6 +488,10 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     ///deactivate if the action is to deactivate the modifier
     ///three arguments callback : self (current ship), name, desired state (activate or deactivate)
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, onModifierToggle);
+    ///Checks if modifier is activated or not, on this ship.
+    ///Arguments is name for the modifier
+    ///Returns true or false
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, isModifierActivated);
 
     ///Sets maximum number of simultaneous controllable squadrons
     ///If already beyond this number, current squadrons will not be destroyed
