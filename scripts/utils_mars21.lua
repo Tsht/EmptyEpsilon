@@ -290,7 +290,7 @@ function doInit()
 
 	addGMFunction("Vague Imperium intercept", function()
 		onGMClick(function(x, y)
-			addFixedWave('Intercepteur Imperial Fury','Intercepteur Imperial Fury',"Imperium",randomWaveAngle(math.random(20), math.random(20)),x,y)
+			addFixedWave(' Imperial Fury','Intercepteur Imperial Fury',"Imperium",randomWaveAngle(math.random(20), math.random(20)),x,y)
 		end)
 	end)
 	
