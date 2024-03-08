@@ -349,7 +349,14 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// Defaults to true.
     /// Example: template:setCanLaunchProbe(false)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setCanLaunchProbe);
-    ///Registers a new squandron type (this is a kind of Blueprint)
+    ///Registers a new ammo blueprint type (this is a kind of Blueprint)
+    ///First argument registers the name of the blueprint, this is an identifier (for instance "Mkan")
+    ///which must 
+    ///Second argument is maximum number of ammo generated (ex: 5)
+    ///Third argument is creation duration in seconds (ex : 5)
+    ///Other arguments register the weapon ammunition name (for instance "Mkan")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, registerAmmoBlueprint);
+    ///Registers a new squadron type (this is a kind of Blueprint)
     ///First argument registers the name of the squadron, this is an identifier (for instance "Interceptors")
     ///Second argument is maximum number of squadrons (ex: 5)
     ///Third argument is creation duration in seconds (ex : 30)
