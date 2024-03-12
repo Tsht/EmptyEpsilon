@@ -267,9 +267,71 @@ function doOnNewPlayerShip(pc)
 		
 	end
 	
-		
+	
 	--popWarpJammerButton = "popWarpjammerButton"
 	--pc:addCustomButton("Relay",popWarpJammerButton,string.format("Deployer antiwarp (%i)", tonumber(pc:getInfosValue(11))),pc.popWarpJammer)
+	registerModifiers(pc)
+end
+
+function registerModifiers(playerShip)
+	print("!!")
+	print("beep boop")
+	playerShip:registerModifier("comp", "recup_energie", "activated")
+	playerShip:registerModifier("comp", "manoeuvre", "activated")
+	playerShip:registerModifier("comp", "Turn_rate", "activated")
+	playerShip:registerModifier("comp", "cloaking", "activated")
+	playerShip:registerModifier("comp", "hacking", "activated")
+	playerShip:registerModifier("comp", "shield regen", "activated")
+	playerShip:registerModifier("comp", "novamk3", "activated")
+
+	playerShip:onModifierToggle(function(pc,name,state)
+		print(name)
+		print(state)
+
+		if((name == "manoeuvre") and (state == "activated")) then
+			pc:setCombatManeuver(600, 250)
+		elseif ((name == "manoeuvre") and (state == "deactivated")) then
+			pc:setCombatManeuver(500, 200)
+		end
+
+        if((name == "recup_energie") and (state == "activated")) then
+			pc:setSystemPowerFactor("reactor", -35)
+		elseif ((name == "recup_energie") and (state == "deactivated")) then
+			pc:setSystemPowerFactor("reactor", -30)
+		end
+
+		if((name == "Turn_rate") and (state == "activated")) then
+			pc:setSpeed(85, 8, 8, 40, 8)
+		elseif ((name == "Turn_rate") and (state == "deactivated")) then
+			pc:setSpeed(85, 6, 8, 40, 8)
+		end
+
+		if((name == "cloaking") and (state == "activated")) then
+			pc:setCloaking(true)
+		elseif ((name == "cloaking") and (state == "deactivated")) then
+			pc:setCloaking(false)
+		end
+		if((name == "hacking") and (state == "activated")) then
+			pc:setCanHack(true)
+		elseif ((name == "hacking") and (state == "deactivated")) then
+			pc:setCanHack(false)
+		end
+		if((name == "shield regen") and (state == "activated")) then
+			pc:setShieldRechargeRate(70)
+		elseif ((name == "shield regen") and (state == "deactivated")) then
+			pc:setShieldRechargeRate(60)
+		end
+		if((name == "novamk3") and (state == "activated")) then
+		--Canon nova mk3
+		pc:setTubeLoadTime(7, 600):setWeaponTubeExclusiveForCustom(7,'NOVAMK3')
+		elseif ((name == "novamk3") and (state == "deactivated")) then
+		pc:setTubeLoadTime(7, 600):weaponTubeDisallowCustomMissile(7,'NOVAMK2'):weaponTubeDisallowCustomMissile(7,'SEEKMK2'):weaponTubeDisallowCustomMissile(7,'MAGSEEK'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MCANMK3'):weaponTubeDisallowCustomMissile(7,'NOVAMK3')
+
+		end
+
+		
+	
+	end) --End onModifierToggle
 end
 
 function doInit()
