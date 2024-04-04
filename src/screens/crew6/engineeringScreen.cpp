@@ -722,16 +722,22 @@ void EngineeringScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
-        if (keys.engineering_select_reactor.getDown()) selectSystem(SYS_Reactor);
-        //if (key.hotkey == "SELECT_CLOAKING") selectSystem(SYS_Cloaking);
-        if (keys.engineering_select_beam_weapons.getDown()) selectSystem(SYS_BeamWeapons);
-        if (keys.engineering_select_missile_system.getDown()) selectSystem(SYS_MissileSystem);
-        if (keys.engineering_select_maneuvering_system.getDown()) selectSystem(SYS_Maneuver);
-        if (keys.engineering_select_impulse_system.getDown()) selectSystem(SYS_Impulse);
-        if (keys.engineering_select_warp_system.getDown()) selectSystem(SYS_Warp);
-        if (keys.engineering_select_jump_drive_system.getDown()) selectSystem(SYS_JumpDrive);
-        if (keys.engineering_select_front_shield_system.getDown()) selectSystem(SYS_FrontShield);
-        if (keys.engineering_select_rear_shield_system.getDown()) selectSystem(SYS_RearShield);
+        for(unsigned int n=0; n<SYS_COUNT; n++) {
+            if (keys.engineering_select_system[n].getDown()) selectSystem(static_cast<ESystem>(n));
+
+            float set_value = keys.engineering_set_power_for_system[n].getValue() * 3.0f;
+            if (set_value != my_spaceship->systems[n].power_request && (set_value != 0.0f || set_power_active[n]))
+            {
+                my_spaceship->commandSetSystemPowerRequest(selected_system, set_value);
+                set_power_active[n] = set_value != 0.0f; //Make sure the next update is send, even if it is back to zero.
+            }
+            set_value = keys.engineering_set_coolant_for_system[n].getValue() * my_spaceship->max_coolant_per_system;
+            if (set_value != my_spaceship->systems[n].coolant_request && (set_value != 0.0f || set_coolant_active[n]))
+            {
+                my_spaceship->commandSetSystemCoolantRequest(selected_system, set_value);
+                set_coolant_active[n] = set_value != 0.0f; //Make sure the next update is send, even if it is back to zero.
+            }
+        }
 
         if (selected_system != SYS_None)
         {
@@ -800,6 +806,19 @@ void EngineeringScreen::onUpdate()
                 coolant_slider->setValue(0.0f);
                 my_spaceship->commandSetSystemPowerRequest(selected_system, 1.0f);
                 my_spaceship->commandSetSystemCoolantRequest(selected_system, 0.0f);
+            }
+
+            float set_value = keys.engineering_set_power.getValue() * 3.0f;
+            if (set_value != my_spaceship->systems[selected_system].power_request && (set_value != 0.0f || set_power_active[selected_system]))
+            {
+                my_spaceship->commandSetSystemPowerRequest(selected_system, set_value);
+                set_power_active[selected_system] = set_value != 0.0f; //Make sure the next update is send, even if it is back to zero.
+            }
+            set_value = keys.engineering_set_coolant.getValue() * my_spaceship->max_coolant_per_system;
+            if (set_value != my_spaceship->systems[selected_system].coolant_request && (set_value != 0.0f || set_coolant_active[selected_system]))
+            {
+                my_spaceship->commandSetSystemCoolantRequest(selected_system, set_value);
+                set_coolant_active[selected_system] = set_value != 0.0f; //Make sure the next update is send, even if it is back to zero.
             }
         }
 
