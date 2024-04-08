@@ -219,7 +219,7 @@ void RawScannerDataRadarOverlay::onDraw(sp::RenderTarget& renderer)
     a_b.push_back(a_b.front());
 
     // Draw each band as a line.
-    if (my_spaceship->has_electrical_sensor) renderer.drawLineBlendAdd(a_r, glm::u8vec4(255, 0, 0, 255));
-    if (my_spaceship->has_biological_sensor) renderer.drawLineBlendAdd(a_g, glm::u8vec4(0, 255, 0, 255));
-    if (my_spaceship->has_gravity_sensor) renderer.drawLineBlendAdd(a_b, glm::u8vec4(0, 0, 255, 255));
+    if (my_spaceship->has_electrical_sensor) renderer.drawLineBlendAdd(a_r, glm::u8vec4(255, 45, 84, 255)); // red
+    if (my_spaceship->has_biological_sensor) renderer.drawLineBlendAdd(a_g, glm::u8vec4(65, 255, 81, 255)); // green
+    if (my_spaceship->has_gravity_sensor)    renderer.drawLineBlendAdd(a_b, glm::u8vec4(70, 120, 255, 255)); // blue
 }
