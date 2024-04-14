@@ -27,6 +27,9 @@ private:
     public:
         GuiElement* layout;
         GuiToggleButton* button;
+        GuiToggleButton* bp_button;
+        GuiProgressbar* loading_bar;
+        GuiLabel* loading_label;
     };
     std::vector<TypeRow> load_type_rows;
     string load_type{MW_None};
