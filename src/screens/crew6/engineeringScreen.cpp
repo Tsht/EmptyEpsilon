@@ -354,8 +354,6 @@ EngineeringScreen::EngineeringScreen(GuiContainer* owner, ECrewPosition crew_pos
 
 
     new ShipsLog(this, crew_position);
-    
-    (new GuiCustomShipFunctions(this, crew_position, "", my_spaceship))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 
     previous_energy_level = 0.0f;
     average_energy_delta = 0.0f;

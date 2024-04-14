@@ -276,23 +276,40 @@ function doOnNewPlayerShip(pc)
 	registerModifiers(pc)
 end
 
+local comps_cd = {}
+
 function registerModifiers(playerShip)
 	print("!!")
 	print("beep boop")
-	playerShip:registerModifier("comp", "recup_energie", "activated")
+	playerShip:registerModifier("comp", "recup_energie", "MdR Meca bien huilee")
 	playerShip:registerModifier("comp", "manoeuvre", "activated")
-	playerShip:registerModifier("comp", "Turn_rate", "activated")
+	playerShip:registerModifier("comp", "Turn_rate", "MdV")
 	playerShip:registerModifier("comp", "cloaking", "activated")
 	playerShip:registerModifier("comp", "hacking", "activated")
 	playerShip:registerModifier("comp", "shield regen", "activated")
 	playerShip:registerModifier("comp", "novamk3", "activated")
 	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
+	playerShip:registerModifier("comp", "regen_reactor", "MdR, regen reacteur")
+
+	playerShip.regeneration_reacteur = function()
+		playerShip:setEnergy(playerShip:getMaxEnergy())
+		local toinsert = { ship = playerShip, station = "engineering", btn_id = "regen_reactor", btn_caption = "Regeneration reacteur", comp_cb = playerShip.regeneration_reacteur, timer = 500}
+		table.insert(comps_cd, toinsert)
+		playerShip:removeCustom("regen_reactor")
+	end
 
 	playerShip:registerModifier("upgrade", "PdC", "Point defence cannon")
 
 	playerShip:onModifierToggle(function(pc,name,state)
 		print(name)
 		print(state)
+
+		if((name == "regen_reactor") and (state == "activated")) then
+			pc:addCustomButton("engineering", name, "Regeneration reacteur", pc.regeneration_reacteur)
+		elseif ((name == "regen_reactor") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
+
 
 		if((name == "manoeuvre") and (state == "activated")) then
 			pc:setCombatManeuver(600, 250)
@@ -355,6 +372,19 @@ function updateForComps(p)
 
 	if(p:isModifierActivated("PdC")) then
 		usePdC(p)
+	end
+end
+
+function updateCompCooldown(delta, p)
+	for i=#comps_cd, 1, -1 do
+		obj = comps_cd[i]
+		obj.timer = obj.timer - delta
+		if((obj.timer < 0) and (obj.ship:isModifierActivated(obj.btn_id))) then
+			print("timer ok")
+			obj.ship:addCustomButton(obj.station, obj.btn_id, obj.btn_caption, obj.comp_cb)
+			table.remove(comps_cd, i)
+		end
+	
 	end
 end
 
@@ -464,6 +494,7 @@ function doUpdateUtils(delta)
 	doUpdateShips(delta)
 	updateEmergencyJump(delta)
 	updateNormalJump(delta)
+	updateCompCooldown(delta)
 	
 end
 
