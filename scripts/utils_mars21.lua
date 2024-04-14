@@ -277,6 +277,7 @@ function doOnNewPlayerShip(pc)
 end
 
 local comps_cd = {}
+local comps_end = {}
 
 function registerModifiers(playerShip)
 	print("!!")
@@ -290,12 +291,27 @@ function registerModifiers(playerShip)
 	playerShip:registerModifier("comp", "novamk3", "activated")
 	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
 	playerShip:registerModifier("comp", "regen_reactor", "MdR, regen reacteur")
+	playerShip:registerModifier("comp", "scramble", "CiC, lancement immediat")
 
 	playerShip.regeneration_reacteur = function()
 		playerShip:setEnergy(playerShip:getMaxEnergy())
 		local toinsert = { ship = playerShip, station = "engineering", btn_id = "regen_reactor", btn_caption = "Regeneration reacteur", comp_cb = playerShip.regeneration_reacteur, timer = 500}
 		table.insert(comps_cd, toinsert)
 		playerShip:removeCustom("regen_reactor")
+	end
+
+	playerShip.scramble = function()
+		local val = playerShip:getSquadronLaunchDuration()
+		playerShip:setSquadronLaunchDuration(0.5)
+		local toinsert = { ship = playerShip, station = "CIC", btn_id = "scramble", btn_caption = "Lancement d'urgence", comp_cb = playerShip.scramble, timer = 500}
+		local toinsert_end = { ship = playerShip, btn_id = "scramble", comp_end = playerShip.scramble_end, timer = 15, restore_value = val}
+		table.insert(comps_cd, toinsert)
+		table.insert(comps_end, toinsert_end)
+	end
+	
+	playerShip.scramble_end = function(restore_value)
+		playerShip:setSquadronLaunchDuration(restore_value)
+		playerShip:removeCustom("scramble")
 	end
 
 	playerShip:registerModifier("upgrade", "PdC", "Point defence cannon")
@@ -310,6 +326,11 @@ function registerModifiers(playerShip)
 			pc:removeCustom(name)
 		end
 
+		if((name == "scramble") and (state == "activated")) then
+			pc:addCustomButton("CIC", name, "Lancement d'urgence", pc.scramble)
+		elseif ((name == "scramble") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
 
 		if((name == "manoeuvre") and (state == "activated")) then
 			pc:setCombatManeuver(600, 250)
@@ -383,6 +404,19 @@ function updateCompCooldown(delta, p)
 			print("timer ok")
 			obj.ship:addCustomButton(obj.station, obj.btn_id, obj.btn_caption, obj.comp_cb)
 			table.remove(comps_cd, i)
+		end
+	
+	end
+end
+
+function updateCompEnd(delta, p)
+	for i=#comps_end, 1, -1 do
+		obj = comps_end[i]
+		obj.timer = obj.timer - delta
+		if(obj.timer < 0) then
+			print("timer end ok")
+			obj.comp_end(obj.restore_value)
+			table.remove(comps_end, i)
 		end
 	
 	end
@@ -495,6 +529,7 @@ function doUpdateUtils(delta)
 	updateEmergencyJump(delta)
 	updateNormalJump(delta)
 	updateCompCooldown(delta)
+	updateCompEnd(delta)
 	
 end
 

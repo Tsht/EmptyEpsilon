@@ -502,6 +502,9 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     ///Second mandatory argument is it composition identifier ("Interceptors")
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, instantiateSquadron);
     
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, getSquadronLaunchDuration);
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setSquadronLaunchDuration);
+
     ///Destroys squadron specifiing its name/identifier
     //REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, destroySquadron);
 
@@ -824,6 +827,8 @@ PlayerSpaceship::PlayerSpaceship()
         registerMemberReplication(&(launched_squadrons_infos[n].leader_id));
         
     }
+
+    registerMemberReplication(&launch_duration);
 
     if (game_server)
     {

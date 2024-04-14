@@ -704,6 +704,9 @@ public:
     void commandOrderSquadronTarget(EAIOrder order, unsigned int idx, P<SpaceObject>& obj);
     void orderSquadron(EAIOrder order, unsigned int idx, const glm::vec2& pos);
     void orderSquadron(EAIOrder order, unsigned int idx, P<SpaceObject>& obj);
+
+    float getSquadronLaunchDuration() { return launch_duration;}
+    void setSquadronLaunchDuration(float duration) { launch_duration = duration ;}
     
 };
 REGISTER_MULTIPLAYER_ENUM(ECommsState);
