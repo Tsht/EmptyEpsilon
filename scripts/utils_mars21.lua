@@ -201,6 +201,7 @@ end
 function doOnNewPlayerShip(pc)
 	pc:setFaction("Imperium")
 	print("New player ship faction :",pc:getFaction())
+	pc.prox_scan = pc:getShortRangeRadarRange() --attention, ca ne change pas meme s'ils boostent la puissance du scan
 	pc.popWarpJammer = function()
 			popWarpJammer(pc)
 	end
@@ -283,6 +284,7 @@ function registerModifiers(playerShip)
 	playerShip:registerModifier("comp", "hacking", "activated")
 	playerShip:registerModifier("comp", "shield regen", "activated")
 	playerShip:registerModifier("comp", "novamk3", "activated")
+	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
 
 	playerShip:onModifierToggle(function(pc,name,state)
 		print(name)
@@ -333,6 +335,20 @@ function registerModifiers(playerShip)
 	
 	end) --End onModifierToggle
 end
+
+function updateForComps(p)
+	if(p:isModifierActivated("Scan prox")) then
+	local obj_list = p:getObjectsInRange(p.prox_scan)
+    if obj_list ~= nil and #obj_list > 0 then
+        for i, obj in ipairs(obj_list) do
+            if obj:isValid() and obj.typeName == "CpuShip" and not obj:isFullyScannedBy(p) then
+                obj:setScanState("simplescan")
+            end
+        end
+    end
+end
+end
+
 
 function doInit()
 	--math.randomseed(os.time())
@@ -398,6 +414,7 @@ function doUpdateUtils(delta)
 	doUpdateShips(delta)
 	updateEmergencyJump(delta)
 	updateNormalJump(delta)
+	
 end
 
 -- Attention a ne pas trop surcharger cette methode
@@ -413,6 +430,8 @@ function doUpdateShips(delta)
 						p:addCustomButton("Relay",popWarpJammerButton,string.format("Deployer antiwarp (%i)", tonumber(p:getInfosValue(11))),p.popWarpJammer)
 					end
 				end
+				--mise a jour via competences
+				updateForComps(p) 
 			end 
 		end 
 
