@@ -66,21 +66,44 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id, P
         rows[n] = row;
     }
 
+    auto createLoadTypeRow = [this](TypeRow &tr, const string &id, const string &name) 
+    {
+        tr.layout = new GuiElement(this, id + "_ROW_" + string(name));
+        tr.layout->setSize(GuiElement::GuiSizeMax, 40)->setAttribute("layout", "horizontal");;
+        //const string& str = kv.first;
+
+        tr.bp_button = new GuiToggleButton(tr.layout, id + "_BPMW_" + name, " ", [this, name](bool value) {
+            if (!target_spaceship)
+                return;
+            target_spaceship->commandSetAmmoBlueprintActivation(name, value);
+            
+        });
+        tr.bp_button->setIcon("gui/icons/station-weapons.png");
+        tr.bp_button->setTextSize(28)->setSize(40, 40);
+
+
+        tr.button = new GuiToggleButton(tr.layout, id + "_MW_" + name, name, [this, name](bool value) {
+            if (value)
+                load_type = name;
+            else
+                load_type = MW_None;
+            for(unsigned int idx = 0; idx < load_type_rows.size(); idx++)
+                load_type_rows[idx].button->setValue(string(idx) == load_type);
+        });
+        tr.button->setTextSize(28)->setSize(150, 40);
+
+        pdi = new GuiPowerDamageIndicator(tr.bp_button, id + "_" + name + "_PDI", SYS_MissileSystem, sp::Alignment::CenterRight, target_spaceship);
+        pdi->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+
+        tr.loading_bar = new GuiProgressbar(tr.layout, id + "_" + name + "_PROGRESS", 0, 1.0, 0);
+        tr.loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(50, 40);
+        tr.loading_label = new GuiLabel(tr.loading_bar, id + "_" + name + "_PROGRESS_LABEL", "", 25);
+        tr.loading_label->setAlignment(sp::Alignment::Center)->setSize(50, 50);
+    };
 
     for (int n = MW_Count-1; n >= 0; n--)
     {
-        load_type_rows[n].layout = new GuiElement(this, id + "_ROW_" + string(n));
-        load_type_rows[n].layout->setSize(GuiElement::GuiSizeMax, 40)->setAttribute("layout", "horizontal");
-
-        load_type_rows[n].button = new GuiToggleButton(load_type_rows[n].layout, id + "_MW_" + string(n), getLocaleMissileWeaponName(EMissileWeapons(n)), [this, n](bool value) {
-            if (value)
-                load_type = EMissileWeapons(n);
-            else
-                load_type = MW_None;
-            for(int idx = 0; idx < MW_Count; idx++)
-                load_type_rows[idx].button->setValue(string(idx) == load_type);
-        });
-        load_type_rows[n].button->setTextSize(28)->setSize(200, 40);
+        createLoadTypeRow(load_type_rows[n], id, getLocaleMissileWeaponName(EMissileWeapons(n)));
     }
     load_type_rows[MW_Homing].button->setIcon("gui/icons/weapon-homing.png");
     load_type_rows[MW_Mine].button->setIcon("gui/icons/weapon-mine.png");
@@ -91,20 +114,8 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id, P
     for(auto& kv : CustomMissileWeaponRegistry::getCustomMissileWeapons())
     {
         TypeRow tr;
-        tr.layout = new GuiElement(this, id + "_ROW_" + string(kv.first));
-        tr.layout->setSize(GuiElement::GuiSizeMax, 40)->setAttribute("layout", "horizontal");;
-        const string& str = kv.first;
-        tr.button = new GuiToggleButton(tr.layout, id + "_MW_" + kv.first, kv.first, [this, str](bool value) {
-            if (value)
-                load_type = str;
-            else
-                load_type = MW_None;
-            for(unsigned int idx = 0; idx < load_type_rows.size(); idx++)
-                load_type_rows[idx].button->setValue(string(idx) == load_type);
-        });
-        tr.button->setTextSize(28)->setSize(200, 40);
+        createLoadTypeRow(tr, id, kv.first);
         tr.button->setIcon(load_type_rows[kv.second.basetype].button->getIcon());
-
         load_type_rows.push_back(tr);
     }
 }
@@ -116,20 +127,51 @@ void GuiMissileTubeControls::setTargetSpaceship(P<PlayerSpaceship> targetSpacesh
 
 void GuiMissileTubeControls::onUpdate()
 {
+
     if (!target_spaceship || !isVisible())
         return;
     for (int n = 0; n < MW_Count; n++)
     {
-        load_type_rows[n].button->setText(getLocaleMissileWeaponName(EMissileWeapons(n)) + " [" + string(target_spaceship->weapon_storage[n]) + "/" + string(target_spaceship->weapon_storage_max[n]) + "]");
+        load_type_rows[n].button->setText(getLocaleMissileWeaponName(EMissileWeapons(n)));
+        load_type_rows[n].loading_label->setText(string(target_spaceship->weapon_storage[n]) + "/" + string(target_spaceship->weapon_storage_max[n]));
         load_type_rows[n].layout->setVisible(target_spaceship->weapon_storage_max[n] > 0);
+
+        unsigned int cur_ammo = target_spaceship->weapon_storage[n];
+        unsigned int max_ammo = target_spaceship->weapon_storage_max[n];
+        if(cur_ammo >= max_ammo)
+        {
+            load_type_rows[n].loading_bar->show();
+            load_type_rows[n].loading_bar->setValue(0);
+        }
+        else
+        {
+            load_type_rows[n].loading_bar->show();
+            load_type_rows[n].loading_bar->setValue(target_spaceship->getAmmoCreationProgression(getLocaleMissileWeaponName(EMissileWeapons(n))));
+        }
+
     }
 
     unsigned int n = MW_Count;
     for(auto& kv : CustomMissileWeaponRegistry::getCustomMissileWeapons())
     {
         assert(n < load_type_rows.size() && "out of bound for custom weapons");
-        load_type_rows[n].button->setText(kv.first + " [" + string(target_spaceship->custom_weapon_storage[kv.first]) + "/" + string(target_spaceship->custom_weapon_storage_max[kv.first]) + "]");
+        load_type_rows[n].button->setText(kv.first);
+        load_type_rows[n].loading_label->setText(string(target_spaceship->custom_weapon_storage[kv.first]) + "/" + string(target_spaceship->custom_weapon_storage_max[kv.first]));
         load_type_rows[n].layout->setVisible(target_spaceship->custom_weapon_storage_max[kv.first] > 0);
+
+        unsigned int cur_ammo = target_spaceship->custom_weapon_storage[kv.first];
+        unsigned int max_ammo = target_spaceship->custom_weapon_storage_max[kv.first];
+        if(cur_ammo >= max_ammo)
+        {
+            load_type_rows[n].loading_bar->show();
+            load_type_rows[n].loading_bar->setValue(0);
+        }
+        else
+        {
+            load_type_rows[n].loading_bar->show();
+            load_type_rows[n].loading_bar->setValue(target_spaceship->getAmmoCreationProgression(kv.first));
+        }
+
         n++;
     }
 
@@ -219,6 +261,21 @@ void GuiMissileTubeControls::onUpdate()
             my_spaceship->commandFireTube(n, target_angle);
         }
     }
+
+    for(auto &row : load_type_rows)
+    {
+        if(target_spaceship->isAmmoBlueprintAvailable(row.button->getText()) == false)
+        {
+            row.bp_button->hide();
+        }
+        else
+        {
+            row.bp_button->show();
+        }
+        row.bp_button->setValue(target_spaceship->isAmmoBlueprintActivated(row.button->getText()));
+        
+    }
+
 }
 
 void GuiMissileTubeControls::setMissileTargetAngle(float angle)

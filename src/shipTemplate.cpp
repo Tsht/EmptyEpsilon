@@ -351,13 +351,13 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setCanLaunchProbe);
     ///Registers a new ammo blueprint type (this is a kind of Blueprint)
     ///First argument registers the name of the blueprint, this is an identifier (for instance "Mkan")
-    ///which must 
-    ///Second argument is maximum number of ammo generated (ex: 5)
-    ///Third argument is creation duration in seconds (ex : 5)
-    ///Other arguments register the weapon ammunition name (for instance "Mkan")
+    ///Do not specify the same name for an ammo blueprint or a squadron composition as it will impact other methods like "setBlueprintAvailable"
+    ///Second argument is creation duration in seconds (ex : 5)
+    
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, registerAmmoBlueprint);
     ///Registers a new squadron type (this is a kind of Blueprint)
     ///First argument registers the name of the squadron, this is an identifier (for instance "Interceptors")
+    ///Do not specify the same name for an ammo blueprint or a squadron composition as it will impact other methods like "setBlueprintAvailable"
     ///Second argument is maximum number of squadrons (ex: 5)
     ///Third argument is creation duration in seconds (ex : 30)
     ///Other arguments register the ship class name (for instance "Light Fighter Defiant class", "Viper", ...)
@@ -985,6 +985,7 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->stock_dock_count = stock_dock_count;
 
     result->squadrons_compositions = squadrons_compositions;
+    result->ammo_blueprints = ammo_blueprints;
     return result;
 }
 
@@ -1027,5 +1028,49 @@ ShipTemplate::TemplateType ShipTemplate::getType()
 {
     return type;
 }
+
+// Tsht
+
+void ShipTemplate::registerSquadronComposition(const string& name, const unsigned int max, const unsigned creation_duration, const std::vector<string>& ship_names)
+{
+    SquadronTemplate sqt;
+    sqt.max_created = max;
+    sqt.construction_duration = creation_duration;
+    sqt.ship_names = ship_names;
+    sqt.template_name = name;
+    sqt.available = false;
+    squadrons_compositions.push_back(sqt);
+}
+
+void ShipTemplate::registerAmmoBlueprint(const string& name, const unsigned int creation_duration)
+{
+    AmmoTemplate amt;
+    amt.construction_duration = creation_duration;
+    amt.weapon_name = name;
+    amt.available = false;
+    ammo_blueprints.emplace(std::pair{name,amt});
+};
+void ShipTemplate::setBlueprintAvailable(const std::vector<string>& names)
+{
+    std::unordered_set<string> template_names(names.begin(), names.end());
+    for(auto &sqt : squadrons_compositions)
+    {
+        if(template_names.find(sqt.template_name) != template_names.end())
+        {
+            sqt.available = true;
+            //template_names.erase(sqt.template_name);
+        }
+    }
+
+    for(auto &amt : ammo_blueprints)
+    {
+        if(template_names.find(amt.second.weapon_name) != template_names.end())
+        {
+            amt.second.available = true;
+            //template_names.erase(amt.template_name);
+        }
+    }
+}
+
 
 #include "shipTemplate.hpp"

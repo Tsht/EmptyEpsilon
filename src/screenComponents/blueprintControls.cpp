@@ -31,7 +31,7 @@ GuiBlueprintsControls::GuiBlueprintsControls(GuiContainer* owner, string id, P<P
         row.bp_toggle_button = new GuiToggleButton(row.layout, id + "_" + string(n) + "_LOAD_BUTTON", tr("cic",sqt.template_name), [n, this](bool value) {
             if (!target_spaceship)
                 return;
-            target_spaceship->commandSetBlueprintActivation(n, value);
+            target_spaceship->commandSetSquadronBlueprintActivation(n, value);
         });
         row.bp_toggle_button->setValue(sqt.activated);
         row.bp_toggle_button->setSize(130, 40);
@@ -73,18 +73,8 @@ void GuiBlueprintsControls::onUpdate()
     int n =0;
     for(auto &row : rows)
     {
-        // if(target_spaceship->isBlueprintAvailable(n) == true)
-        // {
-        //     row.layout->show();
-        // }
-        // else
-        // {
-        //     row.layout->hide();
-        // }
-
-        
         unsigned int cur_sq = target_spaceship->getSquadronCount(n);
-        unsigned int max_sq = target_spaceship->bp_max_created[n];
+        unsigned int max_sq = target_spaceship->squadron_bp_max_created[n];
         if(cur_sq >= max_sq)
         {
             row.loading_bar->show();
@@ -117,7 +107,7 @@ void GuiBlueprintsControls::onDraw(sp::RenderTarget& target)
     int n =0;
     for(auto &row : rows)
     {
-        if(target_spaceship->isBlueprintAvailable(n) == false)
+        if(target_spaceship->isSquadronBlueprintAvailable(n) == false)
         {
             row.layout->hide();
         }
@@ -125,7 +115,7 @@ void GuiBlueprintsControls::onDraw(sp::RenderTarget& target)
         {
             row.layout->show();
         }
-        row.bp_toggle_button->setValue(target_spaceship->isBlueprintActivated(n));
+        row.bp_toggle_button->setValue(target_spaceship->isSquadronBlueprintActivated(n));
         n++;
     }
 }

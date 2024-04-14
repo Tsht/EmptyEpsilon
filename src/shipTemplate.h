@@ -77,6 +77,15 @@ struct SquadronTemplate
     bool available {false};
 };
 
+struct AmmoTemplate
+{
+    string weapon_name;
+    unsigned int max_created{0};
+    float construction_duration {0};
+    bool activated {false};
+    bool available {false};
+};
+
 class SpaceObject;
 class ShipTemplate : public PObject
 {
@@ -185,6 +194,7 @@ public:
     std::vector<ShipDoorTemplate> doors;
     std::vector<DroneTemplate> drones;
     std::vector<SquadronTemplate> squadrons_compositions;
+    std::map<string, AmmoTemplate> ammo_blueprints;
 
     ShipTemplate();
 
@@ -274,29 +284,11 @@ public:
 
     void setCollisionData(P<SpaceObject> object);
 
-    void registerSquadronComposition(const string& name, const unsigned int max, const unsigned creation_duration, const std::vector<string>& ship_names)
-    {
-        SquadronTemplate sqt;
-        sqt.max_created = max;
-        sqt.construction_duration = creation_duration;
-        sqt.ship_names = ship_names;
-        sqt.template_name = name;
-        sqt.available = false;
-        squadrons_compositions.push_back(sqt);
-    }
+    void registerSquadronComposition(const string& name, const unsigned int max, const unsigned creation_duration, const std::vector<string>& ship_names);
 
-    void setBlueprintAvailable(const std::vector<string>& squadron_name)
-    {
-        std::unordered_set<string> template_names(squadron_name.begin(), squadron_name.end());
-        for(auto &sqt : squadrons_compositions)
-        {
-            if(template_names.find(sqt.template_name) != template_names.end())
-            {
-                sqt.available = true;
-                template_names.erase(sqt.template_name);
-            }
-        }
-    }
+    void registerAmmoBlueprint(const string& name, const unsigned int creation_duration);
+
+    void setBlueprintAvailable(const std::vector<string>& squadron_name);
 
 public:
     static P<ShipTemplate> getTemplate(string name);
