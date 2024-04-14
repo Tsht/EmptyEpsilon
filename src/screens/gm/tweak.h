@@ -475,8 +475,9 @@ private:
     std::vector<GuiSlider*> sq_bp_wait_instances;
     std::vector<GuiSlider*> sq_bp_max_instances;
     std::vector<GuiSlider*> sq_bp_duration;
-
+    
     GuiSlider* sq_bp_delay_factor;
+    GuiSlider* sq_launch_duration;
     
     GuiElement* bp_available_col{nullptr};
     GuiElement* bp_in_use_col{nullptr};

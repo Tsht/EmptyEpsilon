@@ -2438,15 +2438,15 @@ GuiBlueprintTweak::GuiBlueprintTweak(GuiContainer* owner)
 {
     // Add four columns.
     bp_available_col = new GuiElement(this, "LAYOUT_1");
-    bp_available_col->setPosition(50, 125, sp::Alignment::TopLeft)->setSize(150, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_available_col->setPosition(50, 175, sp::Alignment::TopLeft)->setSize(150, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_in_use_col = new GuiElement(this, "LAYOUT_2");
-    bp_in_use_col->setPosition(210, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_in_use_col->setPosition(210, 175, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_wait_col = new GuiElement(this, "LAYOUT_3");
-    bp_wait_col->setPosition(320, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_wait_col->setPosition(320, 175, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_max_col = new GuiElement(this, "LAYOUT_4");
-    bp_max_col->setPosition(430, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_max_col->setPosition(430, 175, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_duration_col = new GuiElement(this, "LAYOUT_5");
-    bp_duration_col->setPosition(540, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_duration_col->setPosition(540, 175, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     
     (new GuiLabel(this, "", tr("Squadron Delay ratio"), 20))->setSize(GuiElement::GuiSizeMax, 30);
 
@@ -2460,14 +2460,25 @@ GuiBlueprintTweak::GuiBlueprintTweak(GuiContainer* owner)
     sq_bp_delay_factor->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
     sq_bp_delay_factor->addSnapValue(100, 0.05);
 
-    (new GuiLabel(this, "", tr("Ammo Delay ratio"), 20))->setPosition(50, 50, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 30);
+    (new GuiLabel(this, "", tr("Launch Duration"), 20))->setPosition(50, 50, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 30);
+    sq_launch_duration = new GuiSlider(this, "", 0.0f, 30, 15, [this](float value) {
+            if(this->target)
+            {
+                this->target->launch_duration = value;
+            }
+    });
+    sq_launch_duration->setPosition(50, 75, sp::Alignment::TopLeft);
+    sq_launch_duration->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+    sq_launch_duration->addSnapValue(15, 0.5);
+
+    (new GuiLabel(this, "", tr("Ammo Delay ratio"), 20))->setPosition(50, 100, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 30);
     ammo_bp_delay_factor = new GuiSlider(this, "", 0.0f, 200.0f, 100.0f, [this](float value) {
             if(this->target)
             {
                 this->target->ammo_bp_delay_factor = value / 100.0f;
             }
     });
-    ammo_bp_delay_factor->setPosition(50, 75, sp::Alignment::TopLeft);
+    ammo_bp_delay_factor->setPosition(50, 125, sp::Alignment::TopLeft);
     ammo_bp_delay_factor->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
     ammo_bp_delay_factor->addSnapValue(100, 0.05);
 
@@ -2488,7 +2499,7 @@ void GuiBlueprintTweak::open(P<SpaceObject> target)
     this->target = ship;
     sq_bp_delay_factor->setValue(this->target->sq_bp_delay_factor * 100.0f);
     ammo_bp_delay_factor->setValue(this->target->ammo_bp_delay_factor * 100.0f);
-
+    sq_launch_duration->setValue(this->target->launch_duration);
     
     {
         int n=0;
@@ -2600,4 +2611,5 @@ void GuiBlueprintTweak::onDraw(sp::RenderTarget& renderer)
         n++;
     }
     ammo_bp_delay_factor->setValue(this->target->ammo_bp_delay_factor * 100.0f);
+    sq_launch_duration->setValue(this->target->launch_duration);
 }

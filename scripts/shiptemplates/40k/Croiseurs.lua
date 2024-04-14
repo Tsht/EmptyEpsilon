@@ -964,7 +964,9 @@ template:setDockClasses("Drone","Vaisseau leger","Fregate","destroyer")
 --[[Croiseur Impérial Mars + nova / jouable + torp et laser frontal ]]
 template = ShipTemplate():setName("Croiseur Mars MK2"):setClass("Croiseur", "Artillerie"):setModel("Navy_Battleship_Mars"):setType("playership")
 template:setRadarTrace("battleship.png")
-template:setDescription([[ ** wip ** ]])
+template:setDescription([[ Les croiseurs de combat de classe Mars sont des navires polyvalents pouvant larguer des escadrilles de Chasseurs Fury ou de Bombardiers Starhawk, utiliser ses Batteries d'armes de flanc, ses Pièces d'artillerie navale dorsales ou employer son redoutable Canon Nova de proue. 
+Peu de croiseurs de combat Mars en service dans la Flotte Impériale gardent dorénavant leur configuration d'origine, malgré les récriminations des Technoprêtres les plus orthodoxes.
+]])
 
 template:setHull(2000)
 template:setShields(1200, 1200) -- recharge rate
@@ -1037,7 +1039,7 @@ template:addDoor(7, 3, false)
 --]]
 template:setShortRangeRadarRange(7500) -- a tester face a 4500
 
-template:setTubes(7, 12.0)
+template:setTubes(8, 12.0)
 template:setTubeDirection(0, 0)
 template:setTubeSize(0, "large")
 --Canon nova
@@ -1045,22 +1047,30 @@ template:setCustomWeapon("Nuke", "NOVAMK2", 3, 2200.0, "Kinetic", 20) -- 3 = fac
 template:setCustomWeaponColor("NOVAMK2", 0, 204, 255)
 template:setCustomWeaponStorage("NOVAMK2", 6)
 
+
 template:setTubeLoadTime(0, 80):setWeaponTubeExclusiveForCustom(0,'NOVAMK2')
+
+
+template:setTubeDirection(7, 0)
+template:setTubeSize(7, "large")
+template:setCustomWeapon("Nuke", "NOVAMK3", 3, 2200.0, "Kinetic", 20) -- 3 = facteur de degats face au commun
+template:setCustomWeaponColor("NOVAMK3", 0, 204, 255)
+template:setCustomWeaponStorage("NOVAMK3", 2)
+template:setTubeLoadTime(7, 600):weaponTubeDisallowCustomMissile(7,'NOVAMK2'):weaponTubeDisallowCustomMissile(7,'SEEKMK2'):weaponTubeDisallowCustomMissile(7,'MAGSEEK'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MCANMK3'):weaponTubeDisallowCustomMissile(7,'NOVAMK3')
 
 
 template:setTubeDirection(1, 90)
 template:setTubeDirection(2, -90)
 template:setTubeDirection(3, 90)
 template:setTubeDirection(4, -90)
-template:setTubeLoadTime(1, 12):weaponTubeDisallowCustomMissile(1,'NOVAMK2'):weaponTubeDisallowCustomMissile(1,'SEEKMK2'):weaponTubeDisallowCustomMissile(1,'MAGSEEK')
-template:setTubeLoadTime(2, 12):weaponTubeDisallowCustomMissile(2,'NOVAMK2'):weaponTubeDisallowCustomMissile(2,'SEEKMK2'):weaponTubeDisallowCustomMissile(2,'MAGSEEK')
-template:setTubeLoadTime(3, 12):weaponTubeDisallowCustomMissile(3,'NOVAMK2'):weaponTubeDisallowCustomMissile(3,'SEEKMK2'):weaponTubeDisallowCustomMissile(3,'MAGSEEK')
-template:setTubeLoadTime(4, 12):weaponTubeDisallowCustomMissile(4,'NOVAMK2'):weaponTubeDisallowCustomMissile(4,'SEEKMK2'):weaponTubeDisallowCustomMissile(4,'MAGSEEK')
---:weaponTubeAllowMissile(4,"MCANMK3"):weaponTubeAllowMissile(4,"MAGMCAN")
---:weaponTubeAllowMissile(5,"SEEKMK2"):weaponTubeAllowMissile(5,"MAGSEEK")
+template:setTubeLoadTime(1, 12):weaponTubeDisallowCustomMissile(1,'NOVAMK2'):weaponTubeDisallowCustomMissile(1,'SEEKMK2'):weaponTubeDisallowCustomMissile(1,'MAGSEEK'):weaponTubeDisallowCustomMissile(1,'NOVAMK3')
+template:setTubeLoadTime(2, 12):weaponTubeDisallowCustomMissile(2,'NOVAMK2'):weaponTubeDisallowCustomMissile(2,'SEEKMK2'):weaponTubeDisallowCustomMissile(2,'MAGSEEK'):weaponTubeDisallowCustomMissile(2,'NOVAMK3')
+template:setTubeLoadTime(3, 12):weaponTubeDisallowCustomMissile(3,'NOVAMK2'):weaponTubeDisallowCustomMissile(3,'SEEKMK2'):weaponTubeDisallowCustomMissile(3,'MAGSEEK'):weaponTubeDisallowCustomMissile(3,'NOVAMK3')
+template:setTubeLoadTime(4, 12):weaponTubeDisallowCustomMissile(4,'NOVAMK2'):weaponTubeDisallowCustomMissile(4,'SEEKMK2'):weaponTubeDisallowCustomMissile(4,'MAGSEEK'):weaponTubeDisallowCustomMissile(4,'NOVAMK3')
+
 --Torpille
 template:setTubeDirection(5, 1)
-template:setTubeLoadTime(5, 20):weaponTubeDisallowCustomMissile(5,'NOVAMK2'):weaponTubeDisallowCustomMissile(5,'MCANMK3'):weaponTubeDisallowCustomMissile(5,'MAGMCAN')
+template:setTubeLoadTime(5, 20):weaponTubeDisallowCustomMissile(5,'NOVAMK2'):weaponTubeDisallowCustomMissile(5,'MCANMK3'):weaponTubeDisallowCustomMissile(5,'MAGMCAN'):weaponTubeDisallowCustomMissile(5,'NOVAMK3')
 template:setTubeSize(5,"small")
 template:setCustomWeapon("Nuke", "SEEKMK2", 2, 400.0, "Kinetic", 60)
 template:setCustomWeaponColor("SEEKMK2", 255, 204, 0)
@@ -1069,7 +1079,7 @@ template:setCustomWeaponMultiple("SEEKMK2",1,2)
 -- Torpille EMP 
 template:setTubeDirection(6, -1)
 template:setTubeSize(6, "small")
-template:setTubeLoadTime(6, 20):weaponTubeDisallowCustomMissile(6,'NOVAMK2'):weaponTubeDisallowCustomMissile(6,'MCANMK3'):weaponTubeDisallowCustomMissile(6,'MAGMCAN')
+template:setTubeLoadTime(6, 20):weaponTubeDisallowCustomMissile(6,'NOVAMK2'):weaponTubeDisallowCustomMissile(6,'MCANMK3'):weaponTubeDisallowCustomMissile(6,'MAGMCAN'):weaponTubeDisallowCustomMissile(6,'NOVAMK3')
 template:setCustomWeapon("EMP", "MAGSEEK", 0.5, 400.0, "EMP", 30)
 template:setCustomWeaponColor("MAGSEEK", 0, 204, 255)
 template:setCustomWeaponStorage("MAGSEEK", 4)

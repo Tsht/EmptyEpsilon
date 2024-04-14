@@ -262,7 +262,7 @@ CicScreen::CicScreen(GuiContainer* owner, bool allow_comms)
 
     //(new GuiAlertLevelSelect(this, ""))->setPosition(-20, -70, sp::Alignment::BottomRight)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "verticalbottom");
 
-    (new GuiCustomShipFunctions(this, cagOfficer, "", my_spaceship))->setPosition(-20, 350, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
+    (new GuiCustomShipFunctions(this, cagOfficer, "", my_spaceship))->setPosition(-20, 50, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 
     new ShipsLog(this,"generic");
     if (allow_comms)

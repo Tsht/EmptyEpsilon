@@ -201,6 +201,9 @@ end
 function doOnNewPlayerShip(pc)
 	pc:setFaction("Imperium")
 	print("New player ship faction :",pc:getFaction())
+	pc.prox_scan = pc:getShortRangeRadarRange() --attention, ca ne change pas meme s'ils boostent la puissance du scan
+	pc.pdc_distance = 600 --ahustable 
+	pc.pdc_factor = 50 --ajustable
 	pc.popWarpJammer = function()
 			popWarpJammer(pc)
 	end
@@ -267,9 +270,220 @@ function doOnNewPlayerShip(pc)
 		
 	end
 	
-		
+	
 	--popWarpJammerButton = "popWarpjammerButton"
 	--pc:addCustomButton("Relay",popWarpJammerButton,string.format("Deployer antiwarp (%i)", tonumber(pc:getInfosValue(11))),pc.popWarpJammer)
+	registerModifiers(pc)
+end
+
+local comps_cd = {}
+local comps_end = {}
+
+function registerModifiers(playerShip)
+	print("!!")
+	print("beep boop")
+	playerShip:registerModifier("comp", "recup_energie", "MdR Meca bien huilee")
+	playerShip:registerModifier("comp", "manoeuvre", "activated")
+	playerShip:registerModifier("comp", "Turn_rate", "MdV")
+	playerShip:registerModifier("comp", "cloaking", "activated")
+	playerShip:registerModifier("comp", "hacking", "activated")
+	playerShip:registerModifier("comp", "shield regen", "activated")
+	playerShip:registerModifier("comp", "novamk3", "activated")
+	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
+	playerShip:registerModifier("comp", "regen_reactor", "MdR, regen reacteur")
+	playerShip:registerModifier("comp", "scramble", "CiC, lancement immediat")
+	playerShip:registerModifier("comp", "rappel", "CiC, rappel immediat")
+
+	playerShip.regeneration_reacteur = function()
+		playerShip:setEnergy(playerShip:getMaxEnergy())
+		local toinsert = { ship = playerShip, station = "engineering", btn_id = "regen_reactor", btn_caption = "Regeneration reacteur", comp_cb = playerShip.regeneration_reacteur, timer = 500}
+		table.insert(comps_cd, toinsert)
+		playerShip:removeCustom("regen_reactor")
+	end
+
+	playerShip.scramble = function()
+		local val = playerShip:getSquadronLaunchDuration()
+		playerShip:setSquadronLaunchDuration(0.5)
+		local toinsert = { ship = playerShip, station = "CIC", btn_id = "scramble", btn_caption = "Lancement d'urgence", comp_cb = playerShip.scramble, timer = 500}
+		local toinsert_end = { ship = playerShip, btn_id = "scramble", comp_end = playerShip.scramble_end, timer = 15, restore_value = val}
+		table.insert(comps_cd, toinsert)
+		table.insert(comps_end, toinsert_end)
+	end
+
+	playerShip.rappel = function()
+		local obj_list = playerShip:getObjectsInRange(playerShip:getLongRangeRadarRange())
+		for _, obj in ipairs(obj_list) do
+			if(playerShip:isInSquadron(obj)) then
+				if(random(1,100) <= 10) then
+					playerShip:addToShipLog("Perte d'un vaisseau au docking","yellow")
+					obj:destroy()
+				else
+					obj:orderDock(playerShip)
+					obj:setPosition(playerShip:getPosition())
+				end
+			end
+		end	
+	end
+	
+	playerShip.scramble_end = function(restore_value)
+		playerShip:setSquadronLaunchDuration(restore_value)
+		playerShip:removeCustom("scramble")
+	end
+
+	playerShip:registerModifier("upgrade", "PdC", "Point defence cannon")
+
+	playerShip:onModifierToggle(function(pc,name,state)
+		print(name)
+		print(state)
+
+		if((name == "regen_reactor") and (state == "activated")) then
+			pc:addCustomButton("engineering", name, "Regeneration reacteur", pc.regeneration_reacteur)
+		elseif ((name == "regen_reactor") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
+
+		if((name == "scramble") and (state == "activated")) then
+			pc:addCustomButton("CIC", name, "Lancement d'urgence", pc.scramble)
+		elseif ((name == "scramble") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
+
+		if((name == "rappel") and (state == "activated")) then
+			pc:addCustomButton("CIC", name, "Rappel d'urgence", pc.rappel)
+		elseif ((name == "rappel") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
+
+		if((name == "manoeuvre") and (state == "activated")) then
+			pc:setCombatManeuver(600, 250)
+		elseif ((name == "manoeuvre") and (state == "deactivated")) then
+			pc:setCombatManeuver(500, 200)
+		end
+
+        if((name == "recup_energie") and (state == "activated")) then
+			pc:setSystemPowerFactor("reactor", -35)
+		elseif ((name == "recup_energie") and (state == "deactivated")) then
+			pc:setSystemPowerFactor("reactor", -30)
+		end
+
+		if((name == "Turn_rate") and (state == "activated")) then
+			pc:setSpeed(85, 8, 8, 40, 8)
+		elseif ((name == "Turn_rate") and (state == "deactivated")) then
+			pc:setSpeed(85, 6, 8, 40, 8)
+		end
+
+		if((name == "cloaking") and (state == "activated")) then
+			pc:setCloaking(true)
+		elseif ((name == "cloaking") and (state == "deactivated")) then
+			pc:setCloaking(false)
+		end
+		if((name == "hacking") and (state == "activated")) then
+			pc:setCanHack(true)
+		elseif ((name == "hacking") and (state == "deactivated")) then
+			pc:setCanHack(false)
+		end
+		if((name == "shield regen") and (state == "activated")) then
+			pc:setShieldRechargeRate(70)
+		elseif ((name == "shield regen") and (state == "deactivated")) then
+			pc:setShieldRechargeRate(60)
+		end
+		if((name == "novamk3") and (state == "activated")) then
+		--Canon nova mk3
+		pc:setTubeLoadTime(7, 600):setWeaponTubeExclusiveForCustom(7,'NOVAMK3')
+		elseif ((name == "novamk3") and (state == "deactivated")) then
+		pc:setTubeLoadTime(7, 600):weaponTubeDisallowCustomMissile(7,'NOVAMK2'):weaponTubeDisallowCustomMissile(7,'SEEKMK2'):weaponTubeDisallowCustomMissile(7,'MAGSEEK'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MAGMCAN'):weaponTubeDisallowCustomMissile(7,'MCANMK3'):weaponTubeDisallowCustomMissile(7,'NOVAMK3')
+
+		end
+
+		
+	
+	end) --End onModifierToggle
+end
+
+function updateForComps(p)
+	
+	if(p:isModifierActivated("Scan prox")) then
+	local obj_list = p:getObjectsInRange(p.prox_scan)
+    if obj_list ~= nil and #obj_list > 0 then
+        for i, obj in ipairs(obj_list) do
+            if obj:isValid() and obj.typeName == "CpuShip" and not obj:isFullyScannedBy(p) then
+                obj:setScanState("simplescan")
+            end
+        end
+    end
+	end
+
+	if(p:isModifierActivated("PdC")) then
+		usePdC(p)
+	end
+end
+
+function updateCompCooldown(delta, p)
+	for i=#comps_cd, 1, -1 do
+		obj = comps_cd[i]
+		obj.timer = obj.timer - delta
+		if((obj.timer < 0) and (obj.ship:isModifierActivated(obj.btn_id))) then
+			print("timer ok")
+			obj.ship:addCustomButton(obj.station, obj.btn_id, obj.btn_caption, obj.comp_cb)
+			table.remove(comps_cd, i)
+		end
+	
+	end
+end
+
+function updateCompEnd(delta, p)
+	for i=#comps_end, 1, -1 do
+		obj = comps_end[i]
+		obj.timer = obj.timer - delta
+		if(obj.timer < 0) then
+			print("timer end ok")
+			obj.comp_end(obj.restore_value)
+			table.remove(comps_end, i)
+		end
+	
+	end
+end
+
+function usePdC(ship)
+	if ship ~= nil and ship:isValid() then
+		local obj_list = ship:getObjectsInRange(ship.pdc_distance + 500)
+		for _, obj in ipairs(obj_list) do
+			local obj_type = obj.typeName
+			if obj_type == "HomingMissile" or obj_type == "HVLI" or obj_type == "Nuke" or obj_type == "EMPMissile" then
+				if obj:getOwner():getFaction() ~= ship:getFaction() then
+					if obj.pdc_cycle == nil then
+						local adjusted_factor = ship.pdc_factor * ship:getSystemHealth("beamweapons")
+						obj.pdc_success = (random(1,100) <= adjusted_factor)
+						obj.pdc_cycle = {}
+						local attempts = math.random(1,8)
+						local trigger_time = getScenarioTime()
+						local interval = 1/attempts
+						for i=1,attempts do
+							obj.pdc_cycle[i] = {time = trigger_time, done = false, len = interval*.75}
+							trigger_time = trigger_time + interval
+						end
+					end
+					local current_time = getScenarioTime()
+					local completed_shots = true
+					for _, shot in ipairs(obj.pdc_cycle) do
+						if not shot.done then
+							if current_time >= shot.time then
+								BeamEffect():setSource(ship,0,0,0):setTarget(obj,0,0):setBeamFireSoundPower(2):setRing(false):setDuration(shot.len)
+								shot.done = true
+							end
+							completed_shots = false
+						end
+					end
+					if completed_shots and obj.pdc_success then
+						ship:addToShipLog("Le canon de defense a detruit un missile", "white")	
+						local exp_x, exp_y = obj:getPosition()
+						ExplosionEffect():setPosition(exp_x,exp_y):setSize(40):setOnRadar(true)
+						obj:destroy()
+					end
+				end
+			end
+		end
+	end
 end
 
 function doInit()
@@ -336,6 +550,9 @@ function doUpdateUtils(delta)
 	doUpdateShips(delta)
 	updateEmergencyJump(delta)
 	updateNormalJump(delta)
+	updateCompCooldown(delta)
+	updateCompEnd(delta)
+	
 end
 
 -- Attention a ne pas trop surcharger cette methode
@@ -351,6 +568,8 @@ function doUpdateShips(delta)
 						p:addCustomButton("Relay",popWarpJammerButton,string.format("Deployer antiwarp (%i)", tonumber(p:getInfosValue(11))),p.popWarpJammer)
 					end
 				end
+				--mise a jour via competences
+				updateForComps(p) 
 			end 
 		end 
 
