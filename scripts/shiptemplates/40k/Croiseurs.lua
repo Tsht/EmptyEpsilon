@@ -964,7 +964,9 @@ template:setDockClasses("Drone","Vaisseau leger","Fregate","destroyer")
 --[[Croiseur Impérial Mars + nova / jouable + torp et laser frontal ]]
 template = ShipTemplate():setName("Croiseur Mars MK2"):setClass("Croiseur", "Artillerie"):setModel("Navy_Battleship_Mars"):setType("playership")
 template:setRadarTrace("battleship.png")
-template:setDescription([[ ** wip ** ]])
+template:setDescription([[ Les croiseurs de combat de classe Mars sont des navires polyvalents pouvant larguer des escadrilles de Chasseurs Fury ou de Bombardiers Starhawk, utiliser ses Batteries d'armes de flanc, ses Pièces d'artillerie navale dorsales ou employer son redoutable Canon Nova de proue. 
+Peu de croiseurs de combat Mars en service dans la Flotte Impériale gardent dorénavant leur configuration d'origine, malgré les récriminations des Technoprêtres les plus orthodoxes.
+]])
 
 template:setHull(2000)
 template:setShields(1200, 1200) -- recharge rate
