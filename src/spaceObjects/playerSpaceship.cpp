@@ -505,6 +505,8 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, getSquadronLaunchDuration);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setSquadronLaunchDuration);
 
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, isInSquadron);
+
     ///Destroys squadron specifiing its name/identifier
     //REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, destroySquadron);
 
@@ -1423,7 +1425,7 @@ void PlayerSpaceship::update(float delta)
                 if(cpu && cpu->isDockedWith(this))
                 {
                     cpu->destroy();
-                    nbr_destroyed++; //TODO : give back blueprint power
+                    nbr_destroyed++; 
                 }
                 if(cpu)
                 {

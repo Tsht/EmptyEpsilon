@@ -292,6 +292,7 @@ function registerModifiers(playerShip)
 	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
 	playerShip:registerModifier("comp", "regen_reactor", "MdR, regen reacteur")
 	playerShip:registerModifier("comp", "scramble", "CiC, lancement immediat")
+	playerShip:registerModifier("comp", "rappel", "CiC, rappel immediat")
 
 	playerShip.regeneration_reacteur = function()
 		playerShip:setEnergy(playerShip:getMaxEnergy())
@@ -307,6 +308,21 @@ function registerModifiers(playerShip)
 		local toinsert_end = { ship = playerShip, btn_id = "scramble", comp_end = playerShip.scramble_end, timer = 15, restore_value = val}
 		table.insert(comps_cd, toinsert)
 		table.insert(comps_end, toinsert_end)
+	end
+
+	playerShip.rappel = function()
+		local obj_list = playerShip:getObjectsInRange(playerShip:getLongRangeRadarRange())
+		for _, obj in ipairs(obj_list) do
+			if(playerShip:isInSquadron(obj)) then
+				if(random(1,100) <= 10) then
+					playerShip:addToShipLog("Perte d'un vaisseau au docking","yellow")
+					obj:destroy()
+				else
+					obj:orderDock(playerShip)
+					obj:setPosition(playerShip:getPosition())
+				end
+			end
+		end	
 	end
 	
 	playerShip.scramble_end = function(restore_value)
@@ -329,6 +345,12 @@ function registerModifiers(playerShip)
 		if((name == "scramble") and (state == "activated")) then
 			pc:addCustomButton("CIC", name, "Lancement d'urgence", pc.scramble)
 		elseif ((name == "scramble") and (state == "deactivated")) then
+			pc:removeCustom(name)
+		end
+
+		if((name == "rappel") and (state == "activated")) then
+			pc:addCustomButton("CIC", name, "Rappel d'urgence", pc.rappel)
+		elseif ((name == "rappel") and (state == "deactivated")) then
 			pc:removeCustom(name)
 		end
 
