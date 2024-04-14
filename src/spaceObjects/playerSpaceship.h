@@ -230,11 +230,18 @@ public:
 
 
     //Blueprints which are activated (by player), available (set by GM), and delay to creation
-    float delay_to_next_creation[max_blueprints_count]{};
-    bool bp_activated[max_blueprints_count]{false};
-    bool bp_available[max_blueprints_count]{false};
-    unsigned int bp_max_created[max_blueprints_count]{};
-    float bp_delay_factor{1};
+    float squadron_delay_to_next_creation[max_blueprints_count]{};
+    bool squadron_bp_activated[max_blueprints_count]{false};
+    bool squadron_bp_available[max_blueprints_count]{false};
+    unsigned int squadron_bp_max_created[max_blueprints_count]{};
+
+    std::map<string, float> ammo_delay_to_next_creation{};
+    std::map<string, bool> ammo_bp_activated{};
+    std::map<string, bool> ammo_bp_available{};
+    std::map<string, unsigned int> ammo_bp_max_created{};
+    
+    float sq_bp_delay_factor{1};
+    float ammo_bp_delay_factor{1};
 
     //Squadrons available to launch
     std::array<unsigned int,max_number_of_waiting_squadron> number_of_waiting_squadron_for_bp{};
@@ -553,10 +560,14 @@ public:
     void instantiateSquadron(const string& type);
     void launchWaitingSquadron(unsigned int deck, const string& identifier);
     void commandLaunchSquadron(unsigned int deck, const string& identifier);
-    void commandSetBlueprintActivation(int idx, bool val);
+    void commandSetSquadronBlueprintActivation(int idx, bool val);
+    void commandSetAmmoBlueprintActivation(string idx_str, bool val);
     void launchSquadron(unsigned int deck);
-    bool isBlueprintAvailable(int idx) { return bp_available[idx];}
-    bool isBlueprintActivated(int idx) { return bp_activated[idx];}
+    bool isSquadronBlueprintAvailable(int idx) { return squadron_bp_available[idx];}
+    bool isSquadronBlueprintActivated(int idx) { return squadron_bp_activated[idx];}
+    bool isAmmoBlueprintAvailable(const string& name) { return ammo_bp_available[name];}
+    bool isAmmoBlueprintActivated(const string& name) { return ammo_bp_activated[name];}
+
     bool canLaunchSquadron() 
     {
         unsigned int total_nbr_launching{0};
@@ -659,7 +670,11 @@ public:
 
     float getSquadronCreationProgression(unsigned int idx)
     {
-        return 1.0f - delay_to_next_creation[idx] / ship_template->squadrons_compositions[idx].construction_duration;
+        return 1.0f - squadron_delay_to_next_creation[idx] / ship_template->squadrons_compositions[idx].construction_duration;
+    }
+    float getAmmoCreationProgression(const string &name)
+    {
+        return 1.0f - ammo_delay_to_next_creation[name] / ship_template->ammo_blueprints[name].construction_duration;
     }
 
     bool isLaunchingSquadron(int n)

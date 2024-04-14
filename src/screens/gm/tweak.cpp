@@ -2438,28 +2438,38 @@ GuiBlueprintTweak::GuiBlueprintTweak(GuiContainer* owner)
 {
     // Add four columns.
     bp_available_col = new GuiElement(this, "LAYOUT_1");
-    bp_available_col->setPosition(50, 75, sp::Alignment::TopLeft)->setSize(150, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_available_col->setPosition(50, 125, sp::Alignment::TopLeft)->setSize(150, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_in_use_col = new GuiElement(this, "LAYOUT_2");
-    bp_in_use_col->setPosition(210, 75, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_in_use_col->setPosition(210, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_wait_col = new GuiElement(this, "LAYOUT_3");
-    bp_wait_col->setPosition(320, 75, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_wait_col->setPosition(320, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_max_col = new GuiElement(this, "LAYOUT_4");
-    bp_max_col->setPosition(430, 75, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_max_col->setPosition(430, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     bp_duration_col = new GuiElement(this, "LAYOUT_5");
-    bp_duration_col->setPosition(540, 75, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    bp_duration_col->setPosition(540, 125, sp::Alignment::TopLeft)->setSize(100, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     
-    (new GuiLabel(this, "", tr("Delay ratio"), 20))->setSize(GuiElement::GuiSizeMax, 30);
+    (new GuiLabel(this, "", tr("Squadron Delay ratio"), 20))->setSize(GuiElement::GuiSizeMax, 30);
 
-    bp_delay_factor = new GuiSlider(this, "", 0.0f, 200.0f, 100.0f, [this](float value) {
+    sq_bp_delay_factor = new GuiSlider(this, "", 0.0f, 200.0f, 100.0f, [this](float value) {
             if(this->target)
             {
-                this->target->bp_delay_factor = value / 100.0f;
+                this->target->sq_bp_delay_factor = value / 100.0f;
             }
     });
-    bp_delay_factor->setPosition(50, 25, sp::Alignment::TopLeft);
-    bp_delay_factor->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
-    bp_delay_factor->addSnapValue(100, 0.05);
+    sq_bp_delay_factor->setPosition(50, 25, sp::Alignment::TopLeft);
+    sq_bp_delay_factor->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+    sq_bp_delay_factor->addSnapValue(100, 0.05);
 
+    (new GuiLabel(this, "", tr("Ammo Delay ratio"), 20))->setPosition(50, 50, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 30);
+    ammo_bp_delay_factor = new GuiSlider(this, "", 0.0f, 200.0f, 100.0f, [this](float value) {
+            if(this->target)
+            {
+                this->target->ammo_bp_delay_factor = value / 100.0f;
+            }
+    });
+    ammo_bp_delay_factor->setPosition(50, 75, sp::Alignment::TopLeft);
+    ammo_bp_delay_factor->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+    ammo_bp_delay_factor->addSnapValue(100, 0.05);
 
     (new GuiLabel(bp_available_col, "", tr("Blueprint availability"), 20))->setSize(GuiElement::GuiSizeMax, 30);
     (new GuiLabel(bp_in_use_col, "", tr("Current in use"), 20))->setSize(GuiElement::GuiSizeMax, 30);
@@ -2476,53 +2486,94 @@ void GuiBlueprintTweak::open(P<SpaceObject> target)
         return;
     P<PlayerSpaceship> ship = target;
     this->target = ship;
-    bp_delay_factor->setValue(this->target->bp_delay_factor * 100.0f);
+    sq_bp_delay_factor->setValue(this->target->sq_bp_delay_factor * 100.0f);
+    ammo_bp_delay_factor->setValue(this->target->ammo_bp_delay_factor * 100.0f);
 
-    int n=0;
-    for(auto &sqt : ship->getSquadronCompositions())
+    
     {
-        GuiToggleButton* sq_blueprint = new GuiToggleButton(bp_available_col, "", tr("cic",sqt.template_name), [n, this](bool value) {
-            if (!this->target)
-                return;
-            this->target->bp_available[n] = value;});
-        sq_blueprint->setValue(this->target->bp_available[n]);
-        sq_blueprint->setSize(130, 40);
-        sq_blueprint->setTextSize(30);
+        int n=0;
+        for(auto &sqt : ship->getSquadronCompositions())
+        {
+            GuiToggleButton* sq_blueprint = new GuiToggleButton(bp_available_col, "", tr("cic",sqt.template_name), [n, this](bool value) {
+                if (!this->target)
+                    return;
+                this->target->squadron_bp_available[n] = value;});
+            sq_blueprint->setValue(this->target->squadron_bp_available[n]);
+            sq_blueprint->setSize(130, 40);
+            sq_blueprint->setTextSize(30);
 
-        bp_available.push_back(sq_blueprint);
+            sq_bp_available.push_back(sq_blueprint);
 
-        GuiLabel* in_use = new GuiLabel(bp_in_use_col, "", this->target->getLaunchedSquadronsCount(sqt.template_name), 30);
-        in_use->setSize(GuiElement::GuiSizeMax, 40);
+            GuiLabel* in_use = new GuiLabel(bp_in_use_col, "", this->target->getLaunchedSquadronsCount(sqt.template_name), 30);
+            in_use->setSize(GuiElement::GuiSizeMax, 40);
 
-        bp_in_use.push_back(in_use);
+            sq_bp_in_use.push_back(in_use);
 
-        GuiSlider* wait_instances = new GuiSlider(bp_wait_col, "", 0, sqt.max_created - this->target->getLaunchedSquadronsCount(sqt.template_name), 0, [this, n](int value) {
-            if(this->target)
+            GuiSlider* wait_instances = new GuiSlider(bp_wait_col, "", 0, sqt.max_created - this->target->getLaunchedSquadronsCount(sqt.template_name), 0, [this, n](int value) {
+                if(this->target)
+                {
+                    this->target->number_of_waiting_squadron_for_bp[n] = value;
+                }
+            });
+            wait_instances->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+            sq_bp_wait_instances.push_back(wait_instances);
+
+            GuiSlider* max_instances = new GuiSlider(bp_max_col, "", 0, sqt.max_created *5, 0, [this, n](int value) {
+                if(this->target)
+                {
+                    this->target->squadron_bp_max_created[n] = value;
+                }
+            });
+            max_instances->setValue(sqt.max_created);
+            max_instances->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+            max_instances->addSnapValue(sqt.max_created, 0.25);
+            
+            sq_bp_max_instances.push_back(max_instances);
+
+            GuiSlider* duration = new GuiSlider(bp_duration_col, "",0, sqt.construction_duration *2 , sqt.construction_duration, [this, n](int value)
             {
-                this->target->number_of_waiting_squadron_for_bp[n] = value;
-            }
-        });
-        wait_instances->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
-        bp_wait_instances.push_back(wait_instances);
+                if(this->target)
+                {
+                    this->target->squadron_delay_to_next_creation[n] = value;
+                    this->target->ship_template->squadrons_compositions[n].construction_duration = value;
+                }
+            });
+            duration->setValue(sqt.construction_duration);
+            duration->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+            duration->addSnapValue(sqt.construction_duration, 0.25);
 
-        GuiSlider* max_instances = new GuiSlider(bp_max_col, "", 0, sqt.max_created *5, 0, [this, n](int value) {
-            if(this->target)
+            sq_bp_duration.push_back(duration);
+
+            n++;
+        }
+    }
+
+    {
+        for(auto &amt : ship->ship_template->ammo_blueprints)
+        {
+            GuiToggleButton* ammo_blueprint = new GuiToggleButton(bp_available_col, "", tr("weapons",amt.first), [amt, this](bool value) {
+                if (!this->target)
+                    return;
+                this->target->ammo_bp_available[amt.first] = value;});
+            ammo_blueprint->setValue(this->target->ammo_bp_available[amt.first]);
+            ammo_blueprint->setSize(130, 40);
+            ammo_blueprint->setTextSize(30);
+
+            ammo_bp_available.push_back(ammo_blueprint);
+
+            GuiSlider* duration = new GuiSlider(bp_duration_col, "",0, amt.second.construction_duration *2 , amt.second.construction_duration, [this, amt](int value)
             {
-                this->target->bp_max_created[n] = value;
-            }
-        });
-        max_instances->setValue(sqt.max_created);
-        max_instances->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
-        max_instances->addSnapValue(sqt.max_created, 0.25);
-        
-        bp_max_instances.push_back(max_instances);
-
-        GuiLabel* duration = new GuiLabel(bp_duration_col, "", sqt.construction_duration, 30);
-        duration->setSize(GuiElement::GuiSizeMax, 40);
-
-        bp_duration.push_back(duration);
-
-        n++;
+                if(this->target)
+                {
+                    this->target->ammo_delay_to_next_creation[amt.first] = value;
+                    this->target->ship_template->ammo_blueprints[amt.first].construction_duration = value;
+                }
+            });
+            duration->setValue(amt.second.construction_duration);
+            duration->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+            duration->addSnapValue(amt.second.construction_duration, 0.25);
+            ammo_bp_duration.push_back(duration);
+        }
     }
 
 }
@@ -2531,13 +2582,22 @@ void GuiBlueprintTweak::onDraw(sp::RenderTarget& renderer)
 {
     if(!this->target)
         return;
-    for(size_t n = 0; n< bp_available.size() ; n++)
+    for(size_t n = 0; n< sq_bp_available.size() ; n++)
     {
         auto& sqt = this->target->getSquadronCompositions()[n];
-        bp_in_use[n]->setText(this->target->getLaunchedSquadronsCount(sqt.template_name));
-        bp_wait_instances[n]->setRange(0, std::max(this->target->bp_max_created[n] - this->target->getLaunchedSquadronsCount(sqt.template_name), this->target->number_of_waiting_squadron_for_bp[n]));
-        bp_wait_instances[n]->setValue(this->target->number_of_waiting_squadron_for_bp[n]);
-        bp_max_instances[n]->setValue(this->target->bp_max_created[n]);
-        bp_delay_factor->setValue(this->target->bp_delay_factor * 100.0f);
+        sq_bp_in_use[n]->setText(this->target->getLaunchedSquadronsCount(sqt.template_name));
+        sq_bp_wait_instances[n]->setRange(0, std::max(this->target->squadron_bp_max_created[n] - this->target->getLaunchedSquadronsCount(sqt.template_name), this->target->number_of_waiting_squadron_for_bp[n]));
+        sq_bp_wait_instances[n]->setValue(this->target->number_of_waiting_squadron_for_bp[n]);
+        sq_bp_max_instances[n]->setValue(this->target->squadron_bp_max_created[n]);
+        sq_bp_duration[n]->setValue(this->target->squadron_delay_to_next_creation[n]);
     }
+    sq_bp_delay_factor->setValue(this->target->sq_bp_delay_factor * 100.0f);
+
+    int n = 0;
+    for(auto &amt : this->target->ship_template->ammo_blueprints)
+    {
+        ammo_bp_duration[n]->setValue(this->target->ammo_delay_to_next_creation[amt.first]);
+        n++;
+    }
+    ammo_bp_delay_factor->setValue(this->target->ammo_bp_delay_factor * 100.0f);
 }

@@ -470,19 +470,23 @@ class GuiBlueprintTweak : public GuiTweakPage
 private:
     P<PlayerSpaceship> target;
 
-    std::vector<GuiToggleButton*> bp_available;
-    std::vector<GuiLabel*> bp_in_use;
-    std::vector<GuiSlider*> bp_wait_instances;
-    std::vector<GuiSlider*> bp_max_instances;
-    std::vector<GuiLabel*> bp_duration;
+    std::vector<GuiToggleButton*> sq_bp_available;
+    std::vector<GuiLabel*> sq_bp_in_use;
+    std::vector<GuiSlider*> sq_bp_wait_instances;
+    std::vector<GuiSlider*> sq_bp_max_instances;
+    std::vector<GuiSlider*> sq_bp_duration;
 
-    GuiSlider* bp_delay_factor;
+    GuiSlider* sq_bp_delay_factor;
     
     GuiElement* bp_available_col{nullptr};
     GuiElement* bp_in_use_col{nullptr};
     GuiElement* bp_wait_col{nullptr};
     GuiElement* bp_max_col{nullptr};
     GuiElement* bp_duration_col{nullptr};
+
+    std::vector<GuiToggleButton*> ammo_bp_available;
+    std::vector<GuiSlider*> ammo_bp_duration;
+    GuiSlider* ammo_bp_delay_factor;
 public:
     GuiBlueprintTweak(GuiContainer* owner);
 

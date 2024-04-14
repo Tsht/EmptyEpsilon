@@ -572,9 +572,10 @@ static const int16_t CMD_SET_ANALYSIS_LINK = 0x003A;
 static const int16_t CMD_SET_SYSTEM_POWER_PRESET = 0x003B;
 static const int16_t CMD_SET_SYSTEM_COOLANT_PRESET = 0x003C;
 static const int16_t CMD_LAUNCH_SQUADRON = 0x003D;
-static const int16_t CMD_BLUEPRINT_ACTIVATION = 0x003E;
-static const int16_t CMD_ORDER_SQUADRON_TARGET = 0x003F;
-static const int16_t CMD_ORDER_SQUADRON_POSITION = 0x0041;
+static const int16_t CMD_SQUADRON_BLUEPRINT_ACTIVATION = 0x003E;
+static const int16_t CMD_AMMO_BLUEPRINT_ACTIVATION = 0x003F;
+static const int16_t CMD_ORDER_SQUADRON_TARGET = 0x0041;
+static const int16_t CMD_ORDER_SQUADRON_POSITION = 0x0042;
 
 string alertLevelToString(EAlertLevel level)
 {
@@ -769,12 +770,37 @@ PlayerSpaceship::PlayerSpaceship()
     //delay_to_next_creation.reserve(max_blueprints_count);
     for(unsigned int n = 0; n < max_blueprints_count; n++)
     {
-        registerMemberReplication(&delay_to_next_creation[n]);
-        registerMemberReplication(&bp_activated[n]);
-        registerMemberReplication(&bp_available[n]);
-        registerMemberReplication(&bp_max_created[n]);
+        registerMemberReplication(&squadron_delay_to_next_creation[n]);
+        registerMemberReplication(&squadron_bp_activated[n]);
+        registerMemberReplication(&squadron_bp_available[n]);
+        registerMemberReplication(&squadron_bp_max_created[n]);
     }
-    registerMemberReplication(&bp_delay_factor);
+    
+    for(unsigned int n = 0; n < MW_Count; n++)
+    {
+        const string &name = getLocaleMissileWeaponName(EMissileWeapons(n));
+        ammo_delay_to_next_creation[name] = 0;
+        ammo_bp_activated[name] = false;
+        ammo_bp_available[name] = false;
+
+        registerMemberReplication(&ammo_delay_to_next_creation[name]);
+        registerMemberReplication(&ammo_bp_activated[name]);
+        registerMemberReplication(&ammo_bp_available[name]);
+    }
+
+    for(auto &kv : CustomMissileWeaponRegistry::getCustomMissileWeapons())
+    {
+        ammo_delay_to_next_creation[kv.first] = 0;
+        ammo_bp_activated[kv.first] = false;
+        ammo_bp_available[kv.first] = false;
+        //set in apply template values
+        registerMemberReplication(&ammo_delay_to_next_creation[kv.first]);
+        registerMemberReplication(&ammo_bp_activated[kv.first]);
+        registerMemberReplication(&ammo_bp_available[kv.first]);
+    }
+    
+    registerMemberReplication(&sq_bp_delay_factor);
+    registerMemberReplication(&ammo_bp_delay_factor);
 
     //number_of_waiting_squadron_for_bp.reserve(max_number_of_waiting_squadron);
     for(unsigned int n = 0; n < max_blueprints_count; n++)
@@ -1259,38 +1285,98 @@ void PlayerSpaceship::update(float delta)
     //     }
     // }
 
-    std::set<int> to_progress;
+    std::set<int> to_progress_sq;
+    std::set<string> to_progress_ammo;
 
-    //Auto creation of blueprints (squadrons)
-    unsigned int n=0;
+    //Auto creation of blueprints 
+    unsigned int squadron_bp_idx{0};
     if(ship_template)
     {
+        //Squadrons
         for(const auto& sqt : ship_template->squadrons_compositions)
         {    
             
-            if((getSquadronCount(n) > bp_max_created[n]) 
-            || bp_available[n] == false)
+            if((getSquadronCount(squadron_bp_idx) > squadron_bp_max_created[squadron_bp_idx]) 
+            || squadron_bp_available[squadron_bp_idx] == false)
             {
                 //Strictement superieur : si la derniere escadre est en train de rentrer, il faut tout de meme 
                 //ajuster le delay pour ne pas tout perdre a la destruction
-                delay_to_next_creation[n] = sqt.construction_duration;
+                squadron_delay_to_next_creation[squadron_bp_idx] = sqt.construction_duration;
             }
-            else if (delay_to_next_creation[n] <= 0.0f)
+            else if (squadron_delay_to_next_creation[squadron_bp_idx] <= 0.0f)
             {
                 instantiateSquadron(sqt.template_name);
-                delay_to_next_creation[n] += sqt.construction_duration;
+                squadron_delay_to_next_creation[squadron_bp_idx] += sqt.construction_duration;
             }
-            else if((bp_activated[n] == true) && (getSquadronCount(n) < bp_max_created[n]))
+            else if((squadron_bp_activated[squadron_bp_idx] == true) && (getSquadronCount(squadron_bp_idx) < squadron_bp_max_created[squadron_bp_idx]))
             {
-                to_progress.insert(n);
+                to_progress_sq.insert(squadron_bp_idx);
             }
-            n++;
+            squadron_bp_idx++;
+        }
+        //Ammo
+        auto &amts = ship_template->ammo_blueprints;
+        for (int n = 0; n < MW_Count; n++)
+        {
+            const auto &missile_name = getLocaleMissileWeaponName(EMissileWeapons(n));
+            if(amts.find(missile_name) != amts.end())
+            {
+                
+                if(weapon_storage_max[n] > 0)
+                {
+                    //weapon storage max negatif indique qu'on n'utilise pas cette arme
+                    if((weapon_storage[n] >= weapon_storage_max[n]) 
+                    || ammo_bp_available[missile_name] == false) 
+                    {
+                        ammo_delay_to_next_creation[missile_name] = amts[missile_name].construction_duration; 
+                    }
+                    else if(ammo_delay_to_next_creation[missile_name] <= 0.0f)
+                    {
+                        weapon_storage[n]++;
+                        ammo_delay_to_next_creation[missile_name] += amts[missile_name].construction_duration;
+                    }
+                    else if((ammo_bp_activated[missile_name] == true) && (weapon_storage[n] < weapon_storage_max[n]))
+                    {
+                        to_progress_ammo.insert(missile_name);
+                    }
+                }
+            }
+        }
+        for(auto& kv : CustomMissileWeaponRegistry::getCustomMissileWeapons())
+        {
+            if(amts.find(kv.first) != amts.end())
+            {
+                if(custom_weapon_storage_max[kv.first] > 0)
+                {
+                    if((custom_weapon_storage[kv.first] >= custom_weapon_storage_max[kv.first]) 
+                    || ammo_bp_available[kv.first] == false) 
+                    {
+                        ammo_delay_to_next_creation[kv.first] = amts[kv.first].construction_duration; 
+                    }
+                    else if(ammo_delay_to_next_creation[kv.first] <= 0.0f)
+                    {
+                        custom_weapon_storage[kv.first]++;
+                        ammo_delay_to_next_creation[kv.first] += amts[kv.first].construction_duration;
+                    }
+                    else if((ammo_bp_activated[kv.first] == true) && (custom_weapon_storage[kv.first] < custom_weapon_storage_max[kv.first]))
+                    {
+                        to_progress_ammo.insert(kv.first);
+                    }
+                }
+            }
+        }
+        
+
+        int total_size = to_progress_sq.size() + to_progress_ammo.size();
+        for(int idx : to_progress_sq)
+        {
+            squadron_delay_to_next_creation[idx] -= delta * getSystemEffectiveness(SYS_Hangar) * (1.0f / total_size * sq_bp_delay_factor);
+        }
+        for(string idx : to_progress_ammo)
+        {
+            ammo_delay_to_next_creation[idx] -= delta * getSystemEffectiveness(SYS_Hangar) * (1.0f / total_size * ammo_bp_delay_factor);
         }
 
-        for(int idx : to_progress)
-        {
-            delay_to_next_creation[idx] -= delta * getSystemEffectiveness(SYS_Hangar) * (1.0f / to_progress.size() * bp_delay_factor);
-        }
     }
     //Launch of a waiting squadron
     int deck_to_launch = -1;
@@ -1357,7 +1443,7 @@ void PlayerSpaceship::update(float delta)
                     {
                         float recall_ratio = (float)nbr_destroyed / sqt.ship_names.size();
                         float time_gained = recall_ratio * sqt.construction_duration;
-                        delay_to_next_creation[n] -= time_gained;
+                        squadron_delay_to_next_creation[n] -= time_gained;
                     }
                     n++;
                 }
@@ -1441,16 +1527,26 @@ void PlayerSpaceship::applyTemplateValues()
         gameGlobalInfo->on_new_player_ship.call<void>(P<PlayerSpaceship>(this));
     }
 
-    int n=0;
-    for(auto &sqt : ship_template->squadrons_compositions)
     {
-        bp_activated[n] = sqt.activated;
-        bp_available[n] = sqt.available;
-        delay_to_next_creation[n] = sqt.construction_duration;
-        bp_max_created[n] = sqt.max_created;
-        n++;
+        int n=0;
+        for(auto &sqt : ship_template->squadrons_compositions)
+        {
+            squadron_bp_activated[n] = sqt.activated;
+            squadron_bp_available[n] = sqt.available;
+            squadron_delay_to_next_creation[n] = sqt.construction_duration;
+            squadron_bp_max_created[n] = sqt.max_created;
+            n++;
+        }
     }
     
+    {
+        for(auto &amt : ship_template->ammo_blueprints)
+        {
+            ammo_bp_activated[amt.first] = amt.second.activated;
+            ammo_bp_available[amt.first] = amt.second.available;
+            ammo_delay_to_next_creation[amt.first] = amt.second.construction_duration;
+        }
+    }
 
     
 
@@ -2651,15 +2747,27 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
             orderSquadron((EAIOrder)order, idx, pos);
         }
         break;
-    case CMD_BLUEPRINT_ACTIVATION:
+    case CMD_SQUADRON_BLUEPRINT_ACTIVATION:
         {
             int idx;
             bool val;
             packet >> idx >> val;
-            bp_activated[idx] = val;
+            squadron_bp_activated[idx] = val;
             if(val == false)
             {
-                delay_to_next_creation[idx] = ship_template->squadrons_compositions[idx].construction_duration;
+                squadron_delay_to_next_creation[idx] = ship_template->squadrons_compositions[idx].construction_duration;
+            }
+        }
+        break;
+    case CMD_AMMO_BLUEPRINT_ACTIVATION:
+        {
+            string idx_str;
+            bool val;
+            packet >> idx_str >> val;
+            ammo_bp_activated[idx_str] = val;
+            if(val == false)
+            {
+                ammo_delay_to_next_creation[idx_str] = ship_template->ammo_blueprints[idx_str].construction_duration;
             }
         }
         break;
@@ -3147,10 +3255,17 @@ void PlayerSpaceship::commandOrderSquadronPosition(EAIOrder order, unsigned int 
 }
 
 
-void PlayerSpaceship::commandSetBlueprintActivation(int idx, bool val)
+void PlayerSpaceship::commandSetSquadronBlueprintActivation(int idx, bool val)
 {
     sp::io::DataBuffer packet;
-    packet << CMD_BLUEPRINT_ACTIVATION << idx << val;
+    packet << CMD_SQUADRON_BLUEPRINT_ACTIVATION << idx << val;
+    sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandSetAmmoBlueprintActivation(string idx_str, bool val)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_AMMO_BLUEPRINT_ACTIVATION << idx_str << val;
     sendClientCommand(packet);
 }
 
