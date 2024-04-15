@@ -282,17 +282,20 @@ local comps_end = {}
 function registerModifiers(playerShip)
 	print("!!")
 	print("beep boop")
-	playerShip:registerModifier("comp", "recup_energie", "MdR Meca bien huilee")
-	playerShip:registerModifier("comp", "manoeuvre", "activated")
-	playerShip:registerModifier("comp", "Turn_rate", "MdV")
-	playerShip:registerModifier("comp", "cloaking", "activated")
-	playerShip:registerModifier("comp", "hacking", "activated")
-	playerShip:registerModifier("comp", "shield regen", "activated")
-	playerShip:registerModifier("comp", "novamk3", "activated")
-	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite")
-	playerShip:registerModifier("comp", "regen_reactor", "MdR, regen reacteur")
-	playerShip:registerModifier("comp", "scramble", "CiC, lancement immediat")
-	playerShip:registerModifier("comp", "rappel", "CiC, rappel immediat")
+	playerShip:registerModifier("comp", "recup_energie", "MdR Meca bien huilee O/B")
+	playerShip:registerModifier("comp", "manoeuvre", "MdV manoeuvre defensive O")
+	playerShip:registerModifier("comp", "Turn_rate", "MdV Agilete O/B")
+	playerShip:registerModifier("comp", "hacking", "activated B")
+	playerShip:registerModifier("comp", "novamk3", "activated O")
+	playerShip:registerModifier("comp", "Scan prox", "MdV, scan de proximite O")
+	playerShip:registerModifier("comp", "laser_heat", "Art, laser verts O/B")
+	playerShip:registerModifier("comp", "repair", "MdR, reparations B")
+	playerShip:registerModifier("comp", "jump_charge", "MdV, recharge jump B")
+
+	
+	playerShip:registerModifier("comp", "regen_reactor", "MdR, reserve energie O")
+	playerShip:registerModifier("comp", "scramble", "CiC, lancement immediat B")
+	playerShip:registerModifier("comp", "rappel", "CiC, rappel immediat O")
 
 	playerShip.regeneration_reacteur = function()
 		playerShip:setEnergy(playerShip:getMaxEnergy())
@@ -331,6 +334,8 @@ function registerModifiers(playerShip)
 	end
 
 	playerShip:registerModifier("upgrade", "PdC", "Point defence cannon")
+	playerShip:registerModifier("upgrade", "shield regen", "activated")
+	playerShip:registerModifier("upgrade", "cloaking", "activated")
 
 	playerShip:onModifierToggle(function(pc,name,state)
 		print(name)
@@ -355,9 +360,11 @@ function registerModifiers(playerShip)
 		end
 
 		if((name == "manoeuvre") and (state == "activated")) then
-			pc:setCombatManeuver(600, 250)
+			pc:setSystemDamageRatio(0.7)
+			pc:setSystemDamageHullThreshold(0.7)
 		elseif ((name == "manoeuvre") and (state == "deactivated")) then
-			pc:setCombatManeuver(500, 200)
+			pc:setSystemDamageRatio(0.8)
+			pc:setSystemDamageHullThreshold(0.8)
 		end
 
         if((name == "recup_energie") and (state == "activated")) then
@@ -382,11 +389,50 @@ function registerModifiers(playerShip)
 		elseif ((name == "hacking") and (state == "deactivated")) then
 			pc:setCanHack(false)
 		end
+
 		if((name == "shield regen") and (state == "activated")) then
 			pc:setShieldRechargeRate(70)
 		elseif ((name == "shield regen") and (state == "deactivated")) then
 			pc:setShieldRechargeRate(60)
 		end
+
+		if((name == "repair") and (state == "activated")) then
+			pc:setRepairCrewCount(4)
+		elseif ((name == "repair") and (state == "deactivated")) then
+			pc:setRepairCrewCount(3)
+		end
+
+		if((name == "jump_charge") and (state == "activated")) then
+			pc:setJumpDriveChargeTime(pc:getJumpDriveChargeTime() * 0.8)
+		elseif ((name == "jump_charge") and (state == "deactivated")) then
+			pc:setJumpDriveChargeTime(pc:getJumpDriveChargeTime() / 0.8)
+		end
+
+		if((name == "laser_heat") and (state == "activated")) then
+			pc:setBeamWeaponHeatPerFire(0, 0.009)
+			pc:setBeamWeaponHeatPerFire(1, 0.009)
+			pc:setBeamWeaponHeatPerFire(2, 0.009)
+			pc:setBeamWeaponHeatPerFire(3, 0.018)
+			pc:setBeamWeaponHeatPerFire(4, 0.018)
+			pc:setBeamWeaponHeatPerFire(5, 0.018)
+			pc:setBeamWeaponHeatPerFire(6, 0.018)
+			
+			pc:setBeamWeaponHeatPerFire(7, 0.1) --to verify quicky it's activated
+
+		elseif ((name == "laser_heat") and (state == "deactivated")) then
+			pc:setBeamWeaponHeatPerFire(0, 0.01)
+			pc:setBeamWeaponHeatPerFire(1, 0.01)
+			pc:setBeamWeaponHeatPerFire(2, 0.01)
+			pc:setBeamWeaponHeatPerFire(3, 0.02)
+			pc:setBeamWeaponHeatPerFire(4, 0.02)
+			pc:setBeamWeaponHeatPerFire(5, 0.02)
+			pc:setBeamWeaponHeatPerFire(6, 0.02)
+
+			pc:setBeamWeaponHeatPerFire(7, 0.0) --to verify quicky it's deactivated
+
+		end
+
+
 		if((name == "novamk3") and (state == "activated")) then
 		--Canon nova mk3
 		pc:setTubeLoadTime(7, 600):setWeaponTubeExclusiveForCustom(7,'NOVAMK3')
