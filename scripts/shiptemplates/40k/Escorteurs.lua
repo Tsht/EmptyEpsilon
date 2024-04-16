@@ -212,7 +212,7 @@ template:setSpeed(110, 12, 15)
 template:setBeam(0, 100, 90, 3000.0, 3, 12)
 template:setBeam(1, 100,-90, 3000.0, 3, 12)
 
-template:setCustomWeapon("homing", "chaosM", 1.5, 800.0, "Kinetic", 60)
+template:setCustomWeapon("homing", "chaosM", 1, 800.0, "Kinetic", 60)
 template:setCustomWeaponColor("chaosM", 255, 204, 0)
 template:setCustomWeaponStorage("chaosM", 300)
 template:setCustomWeaponMultiple("chaosM",1,2)
