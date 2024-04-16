@@ -1105,12 +1105,18 @@ template:setDockClasses("Drone","Vaisseau leger","Fregate","destroyer","Chasseur
 template:setCanDock(true)
 template:setCanHack(false)
 
-template:registerSquadronComposition("Ch", 5, 15, "Chasseur Mk2", "Chasseur", "Chasseur","Chasseur")
-template:registerSquadronComposition("Ch2", 5, 15, "Chasseur Mk2", "Chasseur", "Chasseur","Chasseur")
-template:registerSquadronComposition("Ch3", 5, 15, "Chasseur Mk2", "Chasseur", "Chasseur","Chasseur")
-template:registerSquadronComposition("Ch4", 5, 15, "Chasseur Mk2", "Chasseur", "Chasseur","Chasseur")
-template:setBlueprintAvailable("Ch", "Ch3")
+template:registerSquadronComposition("Ch", 5, 30, "Chasseur", "Chasseur", "Chasseur","Chasseur")
+template:registerSquadronComposition("Ch2", 5, 30, "Chasseur Mk2", "Chasseur", "Chasseur","Chasseur")
+template:registerSquadronComposition("Int", 2, 45, "Intercepteur", "Intercepteur", "Intercepteur","Intercepteur")
+template:registerSquadronComposition("Bomb", 2, 80, "Bombardier Imperial Starhawk", "Chasseur","Chasseur","Chasseur")
+template:registerSquadronComposition("Cruis", 1, 300, "Croiseur leger Dauntless")
 
+template:registerAmmoBlueprint("MCANMK3", 20)
+template:registerAmmoBlueprint("MAGMCAN", 60)
+template:registerAmmoBlueprint("SEEKMK2", 60)
+template:registerAmmoBlueprint("MAGSEEK", 80)
+
+template:setBlueprintAvailable("Ch")
 --Dock/balise de renfort de la marine
 
 --template:addDrones("Fregate sword",1)
