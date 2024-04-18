@@ -252,7 +252,7 @@ function doOnNewPlayerShip(pc)
 			
 			if((tonumber(pc:getInfosValue(13)) >= 1) and (pc:getWaypointCount() >=1) and (pc:getSystemHealth("jumpdrive") > 0.5) and (pc:getEnergy()/pc:getMaxEnergy() > 0.8))
 			then
-				activateNormalJump(300, pc, pc.normalJump)
+				activateNormalJump(180, pc, pc.normalJump)
 			elseif (tonumber(pc:getInfosValue(13)) < 1) then
 				pc:addToShipLog("Vous ne pouvez pas calculer le saut", "yellow")
 			elseif (pc:getWaypointCount() < 1) then
