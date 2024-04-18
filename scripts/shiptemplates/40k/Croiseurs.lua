@@ -642,6 +642,53 @@ template:setDefaultAI('default')
 template:setDockClasses("Drone","Vaisseau leger","Fregate","destroyer")
 template:setCanHack(false)
 
+-- croiseur votan
+
+template = ShipTemplate():setName("Croiseur Votan"):setClass("Croiseur", "Artillerie"):setModel("Rogue_Trader_Cruiser")
+template:setRadarTrace("battleship.png")
+template:setDescription([[ ??? ]])
+
+template:setHull(2400)
+template:setShields(1000, 1000)
+template:setSpeed(85, 6, 8, 40, 8)
+
+--template:setReverseSpeed(40,10)
+--                  Arc, Dir, Range, CycleTime, Dmg
+template:setBeam(0, 10, 0, 100.0, 30.0, 20)
+template:setBeam(1, 90, 90, 4500.0, 14.0, 35)
+template:setBeam(2, 90, -90, 4500.0, 14.0, 35)
+template:setBeam(3, 90, 90, 3000.0, 3, 9)
+template:setBeam(4, 90,-90, 3000.0, 3, 9)
+template:setBeam(5, 90, 90, 3000.0, 3, 9)
+template:setBeam(6, 90,-90, 3000.0, 3, 9)
+template:setShortRangeRadarRange(7500)
+--                              Arc, Dir, Rotate speed
+
+--       Tubes
+template:setTubes(8, 12.0)
+
+template:setCustomWeapon("homing", "chaosM", 4, 600.0, "Kinetic", 60)
+template:setCustomWeaponColor("chaosM", 255, 204, 0)
+template:setCustomWeaponStorage("chaosM", 36)
+template:setCustomWeaponMultiple("chaosM",2,3)
+
+
+template:setCustomWeapon("HVLI", "MCANMK3", 5, 1500.0, "Kinetic", 25)
+template:setCustomWeaponMultiple("MCANMK3",1,4)
+template:setCustomWeaponColor("MCANMK3", 255, 150, 103)
+template:setCustomWeaponStorage("MCANMK3", 120)
+
+
+
+template:setTubeDirection(0, 90):setTubeSize(0, "large"):weaponTubeDisallowCustomMissile(0,"MCANMK3")
+template:setTubeDirection(1, -90):setTubeSize(1, "large"):weaponTubeDisallowCustomMissile(1,"MCANMK3")
+template:setTubeDirection(2, 90):weaponTubeDisallowCustomMissile(2,"SEEKMK2")
+template:setTubeDirection(3, -90):weaponTubeDisallowCustomMissile(3,"SEEKMK2")
+template:setTubeDirection(4, 90):weaponTubeDisallowCustomMissile(4,"SEEKMK2")
+template:setTubeDirection(5, -90):weaponTubeDisallowCustomMissile(5,"SEEKMK2")
+template:setTubeDirection(6, 90):weaponTubeDisallowCustomMissile(6,"SEEKMK2")
+template:setTubeDirection(7, -90):weaponTubeDisallowCustomMissile(7,"SEEKMK2")
+
 --[[Croiseur du Chaos Carnage]]
 template = ShipTemplate():setName("Croiseur du Chaos Carnage"):setClass("Croiseur", "Combat"):setModel("Chaos_Cruiser")
 template:setRadarTrace("battleship.png")
