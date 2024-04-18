@@ -33,6 +33,8 @@ template:setSharesEnergyWithDocked(true)
 template:setRepairDocked(true)
 template:setRestocksScanProbes(true)
 
+
+
 template = ShipTemplate():setName("Grande Station"):setModel("space_station_2"):setType("station"):setClass(_("Installation Fixe"), _("subclass", "Support"))
 template:setDescription([[De la taille d'une ville tentaculaire, les stations de cette echelle representent le centre de la puissance spatiale de cette region. Elles remplissent plusieurs fonctions a la fois et representent un investissement considerable en temps, en argent et en main d'oeuvre. Les boucliers et l'epaisse coque d'une enorme station peuvent la maintenir intacte assez longtemps pour que des renforts arrivent, même en cas de siege ou d'assaut massif parfaitement coordonne.]])
 template:setHull(500)
@@ -220,3 +222,18 @@ template:setSharesEnergyWithDocked(true)
 template:setRepairDocked(true)
 template:setRestocksScanProbes(true)
 
+template = ShipTemplate():setName("Station Relai"):setLocaleName(_("station relai")):setClass(_("Installation Fixe"), _("subclass", "Support")):setModel("space_station_4"):setType("playership")
+template:setDescription(_([[Stations de defense rotative standard.]]))
+template:setRadarTrace("smallstation.png")
+template:setHull(2000)
+template:setShields(400, 400, 400, 400, 400, 400)
+template:setSpeed(0, 0.5, 0)	
+template:setDockClasses("Drone","Vaisseau leger","Fregate","Destroyer","Croiseur leger","Croiseur","Cuirasse","Vaisseau-Mere","Alpha")
+
+--               Arc, Dir, Range, CycleTime, Dmg
+template:setBeam(0, 30,   0, 5000.0, 1.5, 50)
+template:setBeam(1, 30,  60, 5000.0, 1.5, 50)
+template:setBeam(2, 30, 120, 5000.0, 1.5, 50)
+template:setBeam(3, 30, 180, 5000.0, 1.5, 50)
+template:setBeam(4, 30, 240, 5000.0, 1.5, 50)
+template:setBeam(5, 30, 300, 5000.0, 1.5, 50)
