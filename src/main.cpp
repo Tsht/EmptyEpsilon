@@ -24,6 +24,7 @@
 #include "menus/autoConnectScreen.h"
 #include "menus/shipSelectionScreen.h"
 #include "menus/optionsMenu.h"
+#include "menus/luaConsole.h"
 #include "factionInfo.h"
 #include "gameGlobalInfo.h"
 #include "spaceObjects/spaceObject.h"
@@ -62,6 +63,7 @@ float camera_pitch;
 bool first_person = false;
 sp::Font* main_font;
 sp::Font* bold_font;
+RenderLayer* consoleRenderLayer;
 RenderLayer* mouseLayer;
 PostProcessor* glitchPostProcessor;
 PostProcessor* warpPostProcessor;
@@ -247,11 +249,14 @@ int main(int argc, char** argv)
     {
         //Setup the rendering layers.
         defaultRenderLayer = new RenderLayer();
-        mouseLayer = new RenderLayer(defaultRenderLayer);
+        consoleRenderLayer = new RenderLayer(defaultRenderLayer);
+        mouseLayer = new RenderLayer(consoleRenderLayer);
         glitchPostProcessor = new PostProcessor("shaders/glitch", mouseLayer);
         glitchPostProcessor->enabled = false;
         warpPostProcessor = new PostProcessor("shaders/warp", glitchPostProcessor);
         warpPostProcessor->enabled = false;
+
+        new LuaConsole();
 
         int width = 1200;
         int height = 900;

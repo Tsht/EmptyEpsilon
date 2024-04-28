@@ -13,6 +13,7 @@ extern float camera_pitch;
 extern bool first_person;
 extern sp::Font* main_font;
 extern sp::Font* bold_font;
+extern RenderLayer* consoleRenderLayer;
 extern RenderLayer* mouseLayer;
 extern PostProcessor* glitchPostProcessor;
 extern PostProcessor* warpPostProcessor;

@@ -46,6 +46,7 @@ public:
     virtual void onTextInput(sp::TextInputEvent e) override;
     virtual void onFocusGained() override;
     virtual void onFocusLost() override;
+    virtual void setAttribute(const string& key, const string& value) override;
 
     bool isValid() const;
     string getText() const;
@@ -59,6 +60,7 @@ public:
     GuiTextEntry* enterCallback(func_t func);
     GuiTextEntry* validator(Validator func);
 
+    void setCursorPosition(int offset);
 protected:
     int getTextOffsetForPosition(glm::vec2 position);
     void runChangeCallback();
