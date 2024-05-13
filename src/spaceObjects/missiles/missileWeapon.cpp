@@ -69,7 +69,7 @@ void MissileWeapon::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, 
 {
     if (long_range) return;
 
-    renderer.drawRotatedSprite("radar/arrow.png", position, 32 * (0.25f + 0.25f * category_modifier), getRotation()-rotation, color);
+    renderer.drawRotatedSprite("radar/missile.png", position, 32 * (0.25f + 0.25f * category_modifier), getRotation()-rotation, color);
 }
 
 void MissileWeapon::update(float delta)
