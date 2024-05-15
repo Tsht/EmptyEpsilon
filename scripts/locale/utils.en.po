@@ -1,0 +1,8 @@
+# Scenario name
+msgid "utils"
+msgstr ""
+
+# Scenario description
+msgid ""
+"Bunch of useful utility functions that can be used in any scenario script."
+msgstr ""
