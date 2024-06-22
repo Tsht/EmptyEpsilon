@@ -592,8 +592,8 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
             float health_max = my_spaceship->getSystemHealthMax(selected_system);
             if (health_max < 1.0f)
             {
-                addSystemEffect(tr("Necessary intervention"), tr("see log"),glm::u8vec4(255,0,0,255)); //TODO TRAD
-                addSystemEffect(tr("Maximal health"), toNearbyIntString(health_max * 100) + "%"); //TODO TRAD
+                //addSystemEffect(tr("Engineer", "Necessary intervention"), tr("see log"),glm::u8vec4(255,0,0,255)); //TODO TRAD
+                addSystemEffect(tr("Engineer", "Maximal health"), toNearbyIntString(health_max * 100) + "%");
             }
             switch(selected_system)
             {
@@ -620,7 +620,7 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
                 {
                     if (my_spaceship->beam_weapons[n].getTurretArc() > 0)
                     {
-                        addSystemEffect(tr("Beam rotation"), toNearbyIntString(effectiveness * 100) + "%");
+                        addSystemEffect(tr("Engineer", "Turret rotation rate"), toNearbyIntString(effectiveness * 100) + "%");
                         break;
                     }
                 }
