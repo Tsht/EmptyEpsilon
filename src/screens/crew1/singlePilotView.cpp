@@ -90,6 +90,17 @@ SinglePilotView::SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetS
     tube_controls->setPosition(20, -20, sp::Alignment::BottomLeft);
     radar->enableTargetProjections(tube_controls);
 
+     // Beam controls beneath the radar.
+    if (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage)
+    {
+        GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
+        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(500, 50);
+        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(80, 50);
+        (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(80, 0, sp::Alignment::BottomLeft)->setSize(132, 50);
+        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
+        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
+    }
+
     // Engine layout in top left corner of left panel.
     auto engine_layout = new GuiElement(this, "ENGINE_LAYOUT");
     engine_layout->setPosition(20, 120, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 250)->setAttribute("layout", "horizontal");
