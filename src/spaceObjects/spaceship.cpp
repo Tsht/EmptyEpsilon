@@ -1328,6 +1328,19 @@ void SpaceShip::update(float delta)
             combat_maneuver_strafe_active = combat_maneuver_strafe_request;
     }
 
+    // If the ship doesn't have thrusters in a given direction, don't try to fire them.
+    if (combat_maneuver_boost_speed == 0)
+    {
+        combat_maneuver_boost_active = 0.0;
+        combat_maneuver_boost_request = 0.0;
+    }
+
+    if (combat_maneuver_strafe_speed == 0)
+    {
+        combat_maneuver_strafe_active = 0.0;
+        combat_maneuver_strafe_request = 0.0;
+    }
+
     // If the ship is making a combat maneuver ...
     if (combat_maneuver_boost_active != 0.0f || combat_maneuver_strafe_active != 0.0f)
     {
@@ -1345,6 +1358,10 @@ void SpaceShip::update(float delta)
         {
             setVelocity(getVelocity() + forward * combat_maneuver_boost_speed * combat_maneuver_boost_active);
             setVelocity(getVelocity() + vec2FromAngle(getRotation() + 90) * combat_maneuver_strafe_speed * combat_maneuver_strafe_active);
+
+            // Add heat to systems consuming combat maneuver boost.
+            addHeat(SYS_Impulse, fabs(combat_maneuver_boost_active) * delta * heat_per_combat_maneuver_boost);
+            addHeat(SYS_Maneuver, fabs(combat_maneuver_strafe_active) * delta * heat_per_combat_maneuver_strafe);
         }
     // If the ship isn't making a combat maneuver, recharge its boost.
     }else if (combat_maneuver_charge < 1.0f)
@@ -1353,13 +1370,6 @@ void SpaceShip::update(float delta)
         if (combat_maneuver_charge > 1.0f)
             combat_maneuver_charge = 1.0f;
     }
-
-    // Add heat to systems consuming combat maneuver boost.
-    if (combat_maneuver_boost_speed > 0.0f)
-        addHeat(SYS_Impulse, fabs(combat_maneuver_boost_active) * delta * heat_per_combat_maneuver_boost);
-    if (combat_maneuver_strafe_speed > 0.0f)
-        addHeat(SYS_Maneuver, fabs(combat_maneuver_strafe_active) * delta * heat_per_combat_maneuver_strafe);
-
     beam_weapons_count = 0;
     for(int n = 0; n < max_beam_weapons; n++)
     {
