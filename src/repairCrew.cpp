@@ -227,7 +227,7 @@ void RepairCrew::update(float delta)
                 else if (hull_new > 1.0f)
                     ship->hull_strength = ship->hull_max;
             }
-            if (ship->auto_repair_enabled && pos == target_position && (system == SYS_None || !ship->hasSystem(system) || ship->systems[system].health == ship->systems[system].health_max))
+            if (ship->auto_repair_enabled && pos == target_position && (system == SYS_None || !ship->hasSystem(system) || ship->systems[system].health >= ship->systems[system].health_max))
             {
                 int n=irandom(0, SYS_COUNT - 1);
 
