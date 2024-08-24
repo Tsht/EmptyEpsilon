@@ -182,6 +182,11 @@ void GuiTextEntry::onTextInput(sp::TextInputEvent e)
         break;
     case sp::TextInputEvent::Up:
     case sp::TextInputEvent::UpWithSelection:{
+        if (up_func)
+        {
+            up_func(text);
+            return;
+        }
         int end_of_line = text.substr(0, selection_end).rfind("\n");
         if (end_of_line < 0)
             return;
@@ -194,6 +199,11 @@ void GuiTextEntry::onTextInput(sp::TextInputEvent e)
         }break;
     case sp::TextInputEvent::Down:
     case sp::TextInputEvent::DownWithSelection:{
+        if (down_func)
+        {
+            down_func(text);
+            return;
+        }
         int start_of_current_line = text.substr(0, selection_end).rfind("\n") + 1;
         int end_of_current_line = text.find("\n", selection_end);
         if (end_of_current_line < 0)
@@ -445,6 +455,17 @@ GuiTextEntry* GuiTextEntry::validator(Validator v)
 {
     this->validator_func = v;
     valid = v(text);
+    return this;
+}
+
+GuiTextEntry* GuiTextEntry::upCallback(func_t func)
+{
+    this->up_func = func;
+    return this;
+}
+GuiTextEntry* GuiTextEntry::downCallback(func_t func)
+{
+    this->down_func = func;
     return this;
 }
 
