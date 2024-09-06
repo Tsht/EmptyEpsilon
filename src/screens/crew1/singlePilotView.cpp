@@ -43,19 +43,22 @@ SinglePilotView::SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetS
     radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators()->setStyle(GuiRadarView::Circular);
     radar->setCallbacks(
         [this](sp::io::Pointer::Button button, glm::vec2 position) {
+            auto last_target = targets.get();
             targets.setToClosestTo(position, 250, TargetsContainer::Targetable, target_spaceship);
-            if (target_spaceship && targets.get())
+             if (target_spaceship && targets.get() && (targets.get() != last_target))
                 target_spaceship->commandSetTarget(targets.get());
             else if (target_spaceship)
                 target_spaceship->commandTargetRotation(vec2ToAngle(position - target_spaceship->getPosition()));
         },
         [this](glm::vec2 position) {
-            if (target_spaceship)
+            targets.setToClosestTo(position, 250, TargetsContainer::Targetable);
+            if (target_spaceship && !targets.get())
+                drag_rotate=true;
+            if (drag_rotate)
                 target_spaceship->commandTargetRotation(vec2ToAngle(position - target_spaceship->getPosition()));
         },
         [this](glm::vec2 position) {
-            if (target_spaceship)
-                target_spaceship->commandTargetRotation(vec2ToAngle(position - target_spaceship->getPosition()));
+            drag_rotate=false;
         }
     );
     radar->setAutoRotating(PreferencesManager::get("single_pilot_radar_lock","0")=="1");
