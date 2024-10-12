@@ -56,3 +56,4 @@ _build*/
 cmake/_win32/
 cmake/android/
 scripts/scenario_test.lua
+_debug_daid/
