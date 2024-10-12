@@ -6,7 +6,7 @@ GuiScrollText::GuiScrollText(GuiContainer* owner, string id, string text)
 {
     auto_scroll_down = false;
     scrollbar = new GuiScrollbar(this, id + "_SCROLL", 0, 1, 0, nullptr);
-    scrollbar->setPosition(0, 0, sp::Alignment::TopRight)->setSize(50, GuiElement::GuiSizeMax);
+    scrollbar->setPosition(0, 0, sp::Alignment::TopRight)->setSize(50, GuiElement::GuiSizeMax)->hide();
 }
 
 GuiScrollText* GuiScrollText::setText(string text)

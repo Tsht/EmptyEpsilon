@@ -32,7 +32,7 @@ void GuiContainer::drawElements(glm::vec2 mouse_position, sp::Rect parent_rect, 
         }else{
             element->hover = element->rect.contains(mouse_position);
 
-            if (element->visible)
+            if (element->visible && (element->rect.size != glm::vec2{0,0}))
             {
                 element->onDraw(renderer);
                 element->drawElements(mouse_position, element->rect, renderer);
@@ -47,7 +47,7 @@ void GuiContainer::drawDebugElements(sp::Rect parent_rect, sp::RenderTarget& ren
 {
     for(GuiElement* element : children)
     {
-        if (element->visible)
+        if (element->visible && (element->rect.size != glm::vec2{0,0}))
         {
             renderer.fillRect(element->rect, glm::u8vec4(255, 255, 255, 5));
             //TODO_GFX: renderer.outlineRect(element->rect, glm::u8vec4(255, 0, 255, 255));
