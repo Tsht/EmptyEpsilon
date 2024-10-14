@@ -767,7 +767,7 @@ set(CPACK_INSTALL_CMAKE_PROJECTS
     "${PROJECT_BINARY_DIR}/SeriousProton;SeriousProton;runtime;${sp_runtime_root}"
 )
 
-# include(CPack)
+include(CPack)
 
 # configure_file(io.github.daid.EmptyEpsilon.metainfo.xml.in io.github.daid.EmptyEpsilon.metainfo.xml)
 
