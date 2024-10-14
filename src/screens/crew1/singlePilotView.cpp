@@ -15,6 +15,7 @@
 #include "screenComponents/jumpControls.h"
 #include "screenComponents/dockingButton.h"
 #include "screenComponents/landingButton.h"
+#include "screenComponents/powerDamageIndicator.h"
 
 #include "screenComponents/missileTubeControls.h"
 #include "screenComponents/aimLock.h"
@@ -30,6 +31,9 @@
 #include "gui/gui2_keyvaluedisplay.h"
 #include "gui/gui2_rotationdial.h"
 #include "gui/gui2_image.h"
+#include "gui/gui2_label.h"
+
+#include "gameGlobalInfo.h"
 
 SinglePilotView::SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetSpaceship)
 : GuiElement(owner, "SINGLE_PILOT_VIEW"), target_spaceship(targetSpaceship)
@@ -51,7 +55,7 @@ SinglePilotView::SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetS
                 target_spaceship->commandTargetRotation(vec2ToAngle(position - target_spaceship->getPosition()));
         },
         [this](glm::vec2 position) {
-            targets.setToClosestTo(position, 250, TargetsContainer::Targetable);
+            targets.setToClosestTo(position, 250, TargetsContainer::Targetable, target_spaceship);
             if (target_spaceship && !targets.get())
                 drag_rotate=true;
             if (drag_rotate)
@@ -100,8 +104,8 @@ SinglePilotView::SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetS
         beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(500, 50);
         (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(80, 50);
         (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(80, 0, sp::Alignment::BottomLeft)->setSize(132, 50);
-        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
-        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
+        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft, target_spaceship))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
+        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR", target_spaceship))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
     }
 
     // Engine layout in top left corner of left panel.

@@ -54,7 +54,7 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
                 my_spaceship->commandTargetRotation(vec2ToAngle(position - my_spaceship->getPosition()));
         },
         [this](glm::vec2 position) {
-            targets.setToClosestTo(position, 250, TargetsContainer::Targetable);
+            targets.setToClosestTo(position, 250, TargetsContainer::Targetable, my_spaceship);
             if (my_spaceship && !targets.get())
                 drag_rotate=true;
             if (drag_rotate)

@@ -538,7 +538,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
                 info_type_button->show();
                 info_type->setValue(st->getLocaleName());
                 info_shields->setValue(station->getShieldDataString());
-                info_hull->setValue(string(int(ceil(station->getHull()))) + "/" + string(int(ceil(s->getHullMax()))));
+                info_hull->setValue(string(int(ceil(station->getHull()))) + "/" + string(int(ceil(station->getHullMax()))));
             }
         }
 
