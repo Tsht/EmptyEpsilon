@@ -528,7 +528,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
                 info_type_button->show();
                 info_type->setValue(st->getLocaleName());
                 info_shields->setValue(ship->getShieldDataString());
-                info_hull->setValue(int(ceil(ship->getHull())));
+                info_hull->setValue(string(int(ceil(ship->getHull()))) + "/" + string(int(ceil(ship->getHullMax()))));
             }
 
             if (station)
@@ -538,7 +538,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
                 info_type_button->show();
                 info_type->setValue(st->getLocaleName());
                 info_shields->setValue(station->getShieldDataString());
-                info_hull->setValue(int(station->getHull()));
+                info_hull->setValue(string(int(ceil(station->getHull()))) + "/" + string(int(ceil(station->getHullMax()))));
             }
         }
 

@@ -94,7 +94,7 @@ public:
     float getHull() { return hull_strength; }
     float getHullMax() { return hull_max; }
     void setHull(float amount) { if (amount < 0) return; hull_strength = std::min(amount, hull_max); }
-    void setHullMax(float amount) { if (amount < 0) return; hull_max = amount; hull_strength = std::max(hull_strength, hull_max); }
+    void setHullMax(float amount) { if (amount < 0) return; hull_max = amount; hull_strength = std::min(hull_strength, hull_max); }
 
     void setSystemDamageRatio(float ratio) { system_damage_ratio = ratio ;}
     void setSystemDamageHullThreshold(float ratio) {system_damage_hull_threshold = ratio;}

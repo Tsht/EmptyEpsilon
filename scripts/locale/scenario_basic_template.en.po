@@ -1,0 +1,7 @@
+# Scenario name
+msgid "Basic Template"
+msgstr ""
+
+# Scenario description
+msgid "Bac a sable (vide)"
+msgstr ""

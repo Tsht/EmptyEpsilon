@@ -47,6 +47,7 @@ private:
     GuiCustomShipFunctions* custom_ship_functions;
     AimLockButton* lock_aim;
     GuiToggleButton* lock_fire;
+    bool drag_rotate;
 
 public:
     SinglePilotView(GuiContainer* owner, P<PlayerSpaceship> targetSpaceship);

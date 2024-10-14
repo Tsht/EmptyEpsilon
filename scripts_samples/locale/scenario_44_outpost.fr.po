@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 # Scenario name
@@ -4322,7 +4322,7 @@ msgstr "Avez-vous des EMP ? ("
 #: scripts/scenario_44_outpost.lua:12068
 msgctxt "ammo-comms"
 msgid "Do you have spare homing missiles for us? ("
-msgstr "Des missiles homing de rechange pour nous ? ("
+msgstr "Des missiles à tête chercheuse (homing) pour nous ? ("
 
 #: scripts/scenario_44_outpost.lua:12070
 msgctxt "ammo-comms"
@@ -4332,7 +4332,7 @@ msgstr "Avez-vous des missiles homing supplémentaires ? ("
 #: scripts/scenario_44_outpost.lua:12080
 msgctxt "ammo-comms"
 msgid "We could use some mines. ("
-msgstr "Nous pourrions avoir besoin de quelques mines. ("
+msgstr "Nous pourrions avoir besoin de quelques mines ("
 
 #: scripts/scenario_44_outpost.lua:12082
 msgctxt "ammo-comms"
@@ -4628,7 +4628,7 @@ msgstr "Qu'aimeriez-vous savoir ?"
 #: scripts/scenario_44_outpost.lua:12301
 msgctxt "station-comms"
 msgid "What's with all the warp jammers?"
-msgstr "C'est quoi tous ces brouilleurs ?"
+msgstr "Que sont les brouilleurs de téléportation et vitesse lumière ?"
 
 #: scripts/scenario_44_outpost.lua:12302
 msgctxt "station-comms"
@@ -4694,17 +4694,17 @@ msgstr "Rumeurs"
 #: scripts/scenario_44_outpost.lua:12338
 msgctxt "station-comms"
 msgid "Explain sensor jammers"
-msgstr "Expliquez-nous les brouilleurs de capteur"
+msgstr "Que sont les brouilleurs de capteurs ?"
 
 #: scripts/scenario_44_outpost.lua:12339
 msgctxt "station-comms"
 msgid "You mean those things that have a call sign that starts with SJ?"
-msgstr "Vous parlez de ces choses qui ont un nom commençant par SJ ?"
+msgstr "Vous parlez de ces modules qui portent un nom commençant par SJ ?"
 
 #: scripts/scenario_44_outpost.lua:12340
 msgctxt "station-comms"
 msgid "Yes. Why so many?"
-msgstr "Oui. Pourquoi autant ?"
+msgstr "Oui, pourquoi il y en a t-il autant ?"
 
 #: scripts/scenario_44_outpost.lua:12341
 msgctxt "station-comms"
@@ -4727,7 +4727,7 @@ msgstr ""
 #: scripts/scenario_44_outpost.lua:12344
 msgctxt "station-comms"
 msgid "Yes. What do they do?"
-msgstr "Oui. A quoi servent-ils?"
+msgstr "Oui, à quoi servent-ils ?"
 
 #: scripts/scenario_44_outpost.lua:12345
 msgctxt "station-comms"
@@ -4737,16 +4737,17 @@ msgid ""
 "traps. If you don't disable the trap, they'll fry your scanners if you pick "
 "them up to neutralize them."
 msgstr ""
-"Les brouilleurs de capteur réduisent la portée de votre capteur longue "
+"Les brouilleurs de capteurs réduisent la portée de vos capteurs longue "
 "distance.\n"
 "L'angle et la portée de la zone d'émission varient d'un brouilleur à "
-"l'autre. Ils sont également conçus pour être piégés. Si vous ne désactivez "
-"pas ces pièges avant de les récupérer, ils grilleront vos scanners."
+"l'autre. Ils sont également conçus pour être protégés. Si vous ne désactivez "
+"pas cette protection en les scannant avant de les récupérer, ils grilleront "
+"vos scanners."
 
 #: scripts/scenario_44_outpost.lua:12348
 msgctxt "station-comms"
 msgid "Yes. How do I get rid of them?"
-msgstr "Oui. Comment puis-je m'en débarrasser ?"
+msgstr "Oui, comment s'en débarrasser ?"
 
 #: scripts/scenario_44_outpost.lua:12349
 msgctxt "station-comms"
@@ -4754,8 +4755,8 @@ msgid ""
 "Just pick them up. You'll want to scan them first if you don't want your "
 "scanners fried."
 msgstr ""
-"Il suffit de les ramasser. Vous voudrez d'abord les scanner si vous ne "
-"voulez pas griller vos scanners."
+"Il suffit de les ramasser. Pensez à les scanner avant si vous ne voulez pas "
+"griller vos scanners."
 
 #: scripts/scenario_44_outpost.lua:12355 scripts/scenario_44_outpost.lua:13147
 msgctxt "orders-comms"
@@ -4809,8 +4810,8 @@ msgid ""
 "Goods or components available for sale: quantity, cost in reputation\n"
 msgstr ""
 "Station %s :\n"
-"Marchandises ou composants disponibles à la vente : quantité, coût en "
-"réputation :\n"
+"Marchandises ou composants disponibles à la vente : (quantité, coût en "
+"réputation)\n"
 
 #: scripts/scenario_44_outpost.lua:12410
 #, lua-format
@@ -5019,7 +5020,7 @@ msgstr "Nous avons une nouvelle recrue à vous proposer au poste de réparateur.
 #, lua-format
 msgctxt "trade-comms"
 msgid "Recruit repair crew member for %i reputation"
-msgstr "Recruter un membre de l'équipe de réparation pour %i réputation."
+msgstr "Recruter un membre de l'équipe de réparation pour %i rép"
 
 #: scripts/scenario_44_outpost.lua:12649
 msgctxt "trade-comms"
@@ -6797,7 +6798,7 @@ msgstr "Nous partons immédiatement défendre le marqueur %d."
 #: scripts/scenario_44_outpost.lua:14222 scripts/scenario_44_outpost.lua:15134
 msgctxt "shipAssist-comms"
 msgid "Assist me"
-msgstr "Aidez-nous"
+msgstr "Aidez-nous !"
 
 #: scripts/scenario_44_outpost.lua:14223 scripts/scenario_44_outpost.lua:15135
 msgctxt "shipAssist-comms"
@@ -6890,7 +6891,7 @@ msgstr "Réputation insuffisante pour acheter."
 #: scripts/scenario_44_outpost.lua:14406 scripts/scenario_44_outpost.lua:14927
 msgctxt "trade-comms"
 msgid "Do you have cargo you might sell?"
-msgstr "Auriez-vous de la cargaison à vendre ?"
+msgstr "Auriez-vous des marchandises à vendre ?"
 
 #: scripts/scenario_44_outpost.lua:14408 scripts/scenario_44_outpost.lua:14929
 msgctxt "trade-comms"

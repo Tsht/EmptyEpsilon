@@ -1,0 +1,7 @@
+# Scenario name
+msgid "Test"
+msgstr ""
+
+# Scenario description
+msgid "Uniquement pour tests\n"
+msgstr ""

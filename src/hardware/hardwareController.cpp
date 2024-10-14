@@ -378,6 +378,7 @@ bool HardwareController::getVariableValue(string variable_name, float& value)
     SHIP_VARIABLE("Oxygene5", ship->getOxygenRatio(5));
     SHIP_VARIABLE("Oxygene6", ship->getOxygenRatio(6));
     SHIP_VARIABLE("ShieldsUp", ship->shields_active ? 1.0f : 0.0f);
+    SHIP_VARIABLE("ShieldsCalibrating", ship->shield_calibration_delay / ship->shield_calibration_time);
     SHIP_VARIABLE("Impulse", ship->current_impulse * ship->getSystemEffectiveness(SYS_Impulse));
     SHIP_VARIABLE("Warp", ship->current_warp * ship->getSystemEffectiveness(SYS_Warp));
     SHIP_VARIABLE("Docking", ship->docking_state == DS_Docking ? 1.0f : 0.0f);

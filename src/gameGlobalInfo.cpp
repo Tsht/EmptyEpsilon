@@ -1,4 +1,5 @@
 #include <i18n.h>
+#include "menus/luaConsole.h"
 #include "gameGlobalInfo.h"
 #include "preferenceManager.h"
 #include "scenarioInfo.h"
@@ -17,6 +18,7 @@ static inline sp::io::DataBuffer& operator >> (sp::io::DataBuffer& packet, EComm
 #include "soundManager.h"
 #include "random.h"
 #include "config.h"
+#include "io/json.h"
 #include <SDL_assert.h>
 
 P<GameGlobalInfo> gameGlobalInfo;
@@ -541,6 +543,9 @@ static int getPlayerShip(lua_State* L)
         }
         return 0;
     }
+    if (index == -2) {
+        return convert<P<PlayerSpaceship> >::returnType(L, my_spaceship);
+    }
     if (index < 1 || index > GameGlobalInfo::max_player_ships)
         return 0;
     P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(index - 1);
@@ -553,6 +558,7 @@ static int getPlayerShip(lua_State* L)
 /// PlayerSpaceships are 1-indexed.
 /// A new ship is assigned the lowest available index, and a destroyed ship leaves its index vacant.
 /// Pass -1 to return the first active player ship.
+/// Pass -2 to return the current player ship.
 /// Example: getPlayerShip(2) -- returns the second-indexed ship, if it exists
 REGISTER_SCRIPT_FUNCTION(getPlayerShip);
 
@@ -932,3 +938,179 @@ static int getEEVersion(lua_State* L)
 /// Returns a string with the current EmptyEpsilon version number, such as "20221029".
 /// Example: getEEVersion() -- returns 20221029 on EE-2022.10.29
 REGISTER_SCRIPT_FUNCTION(getEEVersion);
+
+static int luaLogPrint(lua_State* L, bool print)
+{
+    string message;
+    int n = lua_gettop(L);  /* number of arguments */
+    for (int i=1; i<=n; i++) {
+        if (lua_istable(L, i)) {
+            if (i > 1)
+                message += " ";
+            message += "{";
+            lua_pushnil(L);
+            bool first = true;
+            while(lua_next(L, i)) {
+                if (first) first = false; else message += ",";
+                auto s = luaL_tolstring(L, -2, nullptr);
+                if (s != nullptr) {
+                    message += s;
+                    message += "=";
+                }
+                lua_pop(L, 1);
+                s = luaL_tolstring(L, -1, nullptr);
+                if (s != nullptr) {
+                    message += s;
+                }
+                lua_pop(L, 2);
+            }
+            message += "}";
+        } else {
+            auto s = luaL_tolstring(L, i, nullptr);
+            if (s != nullptr) {
+                if (i > 1)
+                    message += " ";
+                message += s;
+            }
+            lua_pop(L, 1);
+        }
+    }
+    LOG(Info, "LUA:", message);
+    if (print)
+        LuaConsole::addLog(message);
+    return 0;
+}
+static int luaPrint(lua_State* L)
+{
+    return luaLogPrint(L, true);
+}
+static int luaLog(lua_State* L)
+{
+    return luaLogPrint(L, false);
+}
+REGISTER_SCRIPT_FUNCTION_NAMED(luaPrint, "print");
+REGISTER_SCRIPT_FUNCTION_NAMED(luaLog, "log");
+
+static nlohmann::json luaToJSONImpl(lua_State* L, int lua_index) {
+    if (lua_isboolean(L, lua_index)) {
+        return bool(lua_toboolean(L, lua_index));
+    } else if (lua_isinteger(L, lua_index)) {
+        return lua_tointeger(L, lua_index);
+    } else if (lua_isnumber(L, lua_index)) {
+        return lua_tonumber(L, lua_index);
+    } else if (lua_isstring(L, lua_index)) {
+        return lua_tostring(L, lua_index);
+    } else if (lua_istable(L, lua_index)) {
+        // Figure out of the table is a list or not.
+        bool is_array = true;
+        int index_max = std::numeric_limits<int>::min();
+        int index_min = std::numeric_limits<int>::max();
+        lua_pushnil(L);
+        while(lua_next(L, lua_index) && is_array) {
+            if (!lua_isinteger(L, -2)) {
+                is_array = false;
+            } else {
+                int idx = lua_tointeger(L, -2);
+                index_max = std::max(idx, index_max);
+                index_min = std::min(idx, index_min);
+            }
+            lua_pop(L, 1);
+        }
+        if (is_array && index_min == 1 && index_max < 0x10000) {
+            auto json = nlohmann::json::array();
+            for(int idx=1; idx<=index_max; idx++) {
+                lua_rawgeti(L, lua_index, idx);
+                json.push_back(luaToJSONImpl(L, lua_gettop(L)));
+                lua_pop(L, 1);
+            }
+            return json;
+        } else {
+            auto json = nlohmann::json::object();
+            lua_pushnil(L);
+            while(lua_next(L, lua_index)) {
+                std::string key = "?";
+                if (lua_isboolean(L, -2)) {
+                    key = lua_toboolean(L, -2) ? "true" : "false";
+                } else if (lua_isinteger(L, -2)) {
+                    key = std::to_string(lua_tointeger(L, -2));
+                } else if (lua_isnumber(L, -2)) {
+                    key = std::to_string(lua_tonumber(L, -2));
+                } else if (lua_isstring(L, -2)) {
+                    key = lua_tostring(L, -2);
+                }
+                json[key] = luaToJSONImpl(L, lua_gettop(L));
+                lua_pop(L, 1);
+            }
+            return json;
+        }
+    }
+    return {};
+}
+
+static int luaToJSON(lua_State* L)
+{
+    auto argc = lua_gettop(L);
+    for(int n=1; n<=argc; n++) {
+        auto json = luaToJSONImpl(L, n);
+        auto res = json.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+        lua_pushstring(L, res.c_str());
+    }
+    return argc;
+}
+/// string toJSON(data)
+/// Returns a json string with the input data converted to json.
+REGISTER_SCRIPT_FUNCTION_NAMED(luaToJSON, "toJSON");
+
+static void luaFromJSONImpl(lua_State* L, const nlohmann::json& json)
+{
+    if (json.is_boolean()) {
+        lua_pushboolean(L, bool(json));
+    } else if (json.is_string()) {
+        auto s = static_cast<std::string>(json);
+        lua_pushlstring(L, s.c_str(), s.size());
+    } else if (json.is_number_integer()) {
+        lua_pushinteger(L, int(json));
+    } else if (json.is_number()) {
+        lua_pushnumber(L, json);
+    } else if (json.is_array()) {
+        lua_newtable(L);
+        int idx = 1;
+        for(const auto& v : json) {
+            luaFromJSONImpl(L, v);
+            lua_rawseti(L, -2, idx++);
+        }
+    } else if (json.is_object()) {
+        lua_newtable(L);
+        for(const auto& v : json.items()) {
+            lua_pushstring(L, v.key().c_str());
+            luaFromJSONImpl(L, v.value());
+            lua_rawset(L, -3);
+        }
+    } else {
+        lua_pushnil(L);
+    }
+}
+
+static int luaFromJSON(lua_State* L)
+{
+    bool error = false;
+    auto argc = lua_gettop(L);
+    for(int n=1; n<=argc; n++) {
+        auto str = lua_tostring(L, n);
+        std::string err;
+        auto res = sp::json::parse(str, err);
+        if (res.has_value()) {
+            luaFromJSONImpl(L, res.value());
+        } else {
+            lua_pushstring(L, err.c_str());
+            error = true;
+            break;
+        }
+    }
+    if (error)
+        return lua_error(L);
+    return argc;
+}
+/// table/value fromJSON(data)
+/// Returns a table/value converted from a json string
+REGISTER_SCRIPT_FUNCTION_NAMED(luaFromJSON, "fromJSON");

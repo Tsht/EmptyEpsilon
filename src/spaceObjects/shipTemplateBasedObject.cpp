@@ -508,6 +508,7 @@ float ShipTemplateBasedObject::getShieldRechargeRate(int shield_index)
 void ShipTemplateBasedObject::setTemplate(string template_name)
 {
     P<ShipTemplate> new_ship_template = ShipTemplate::getTemplate(template_name);
+    if (!new_ship_template) return;
     this->template_name = template_name;
     ship_template = new_ship_template;
     type_name = new_ship_template->getLocaleName();
@@ -588,7 +589,7 @@ string ShipTemplateBasedObject::getShieldDataString()
     {
         if (n > 0)
             data += ":";
-        data += string(int(shield_level[n]));
+        data += string(int(shield_level[n])) + "/" + string(int(shield_max[n]));
     }
     return data;
 }

@@ -1,0 +1,9 @@
+# Scenario name
+msgid "Warhammer 40k V3 tarkus script"
+msgstr ""
+
+# Scenario description
+msgid ""
+"Map of the roleplay game.\n"
+"WIP"
+msgstr ""

@@ -24,6 +24,7 @@
 #include "menus/autoConnectScreen.h"
 #include "menus/shipSelectionScreen.h"
 #include "menus/optionsMenu.h"
+#include "menus/luaConsole.h"
 #include "factionInfo.h"
 #include "gameGlobalInfo.h"
 #include "spaceObjects/spaceObject.h"
@@ -62,6 +63,7 @@ float camera_pitch;
 bool first_person = false;
 sp::Font* main_font;
 sp::Font* bold_font;
+RenderLayer* consoleRenderLayer;
 RenderLayer* mouseLayer;
 PostProcessor* glitchPostProcessor;
 PostProcessor* warpPostProcessor;
@@ -131,7 +133,9 @@ int main(int argc, char** argv)
     LOG(Info, "Starting...");
     new Engine();
     string configuration_path = ".";
-    if (getenv("HOME"))
+    if (getenv("EE_CONF_DIR"))
+        configuration_path = string(getenv("EE_CONF_DIR"));
+    else if (getenv("HOME"))
         configuration_path = string(getenv("HOME")) + "/.emptyepsilon";
 #ifdef STEAMSDK
     {
@@ -148,7 +152,7 @@ int main(int argc, char** argv)
         char* value = strchr(argv[n], '=');
         if (!value) continue;
         *value++ = '\0';
-        PreferencesManager::set(string(argv[n]).strip(), string(value).strip());
+        PreferencesManager::setTemporary(string(argv[n]).strip(), string(value).strip());
     }
 
     if (PreferencesManager::get("proxy") != "")
@@ -225,31 +229,45 @@ int main(int argc, char** argv)
     if (PreferencesManager::get("username", "") == "")
     {
 #ifdef STEAMSDK
-        PreferencesManager::set("username", SteamFriends()->GetPersonaName());
+        PreferencesManager::setTemporary("username", SteamFriends()->GetPersonaName());
 #else
         if (getenv("USERNAME"))
-            PreferencesManager::set("username", getenv("USERNAME"));
+            PreferencesManager::setTemporary("username", getenv("USERNAME"));
         else if (getenv("USER"))
-            PreferencesManager::set("username", getenv("USER"));
+            PreferencesManager::setTemporary("username", getenv("USER"));
 #endif
     }
 
-    if (!GuiTheme::loadTheme("default", PreferencesManager::get("guitheme", "gui/default.theme.txt")))
+    //For now there is only one named theme : default.
+    string theme_name = PreferencesManager::get("guitheme", "default");
+    if (!GuiTheme::loadTheme(theme_name, "gui/" + theme_name +".theme.txt"))
     {
-        LOG(ERROR, "Failed to load default theme, exiting.");
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Failed to load gui theme, resources missing?", nullptr);
-        return 1;
+        LOG(ERROR, "Failed to load "+ theme_name + " theme, trying default. Resources missing or contains errors ? Check gui/" + theme_name + ".theme.txt");
+        if (!GuiTheme::loadTheme("default", "gui/default.theme.txt"))
+        {
+            LOG(ERROR, "Failed to load default theme, exiting. Check gui/default.theme.txt"); //Yes, we may try to load twice default theme but this should be a rare error case which always finish in exit
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Failed to load gui theme, resources missing or contains errors ? Check gui/default.theme.txt", nullptr);
+            return 1;
+        }
+        GuiTheme::setCurrentTheme("default");
+    }
+    else
+    {
+        GuiTheme::setCurrentTheme(theme_name);
     }
 
     if (PreferencesManager::get("headless") == "")
     {
         //Setup the rendering layers.
         defaultRenderLayer = new RenderLayer();
-        mouseLayer = new RenderLayer(defaultRenderLayer);
+        consoleRenderLayer = new RenderLayer(defaultRenderLayer);
+        mouseLayer = new RenderLayer(consoleRenderLayer);
         glitchPostProcessor = new PostProcessor("shaders/glitch", mouseLayer);
         glitchPostProcessor->enabled = false;
         warpPostProcessor = new PostProcessor("shaders/warp", glitchPostProcessor);
         warpPostProcessor->enabled = false;
+
+        new LuaConsole();
 
         int width = 1200;
         int height = 900;
@@ -330,8 +348,8 @@ int main(int argc, char** argv)
     soundManager->setMusicVolume(PreferencesManager::get("music_volume", "50").toFloat());
     soundManager->setMasterSoundVolume(PreferencesManager::get("sound_volume", "50").toFloat());
 
-    main_font = GuiTheme::getTheme("default")->getStyle("base")->states[0].font;
-    bold_font = GuiTheme::getTheme("default")->getStyle("bold")->states[0].font;
+    main_font = GuiTheme::getCurrentTheme()->getStyle("base")->states[0].font;
+    bold_font = GuiTheme::getCurrentTheme()->getStyle("bold")->states[0].font;
     if (!main_font || !bold_font)
     {
         LOG(ERROR, "Missing font or bold font.");
@@ -403,8 +421,11 @@ int main(int argc, char** argv)
         // Create the server.
         new EpsilonServer(defaultServerPort);
 
+        if(!gameGlobalInfo) // => failed to start server
+            return 1;
+
         // Load the scenario and open the ship selection screen.
-        gameGlobalInfo->startScenario(PreferencesManager::get("server_scenario"));
+        gameGlobalInfo->startScenario(PreferencesManager::get("server_scenario"), loadScenarioSettingsFromPrefs());
         new ShipSelectionScreen();
     }
 
@@ -464,7 +485,7 @@ void returnToMainMenu(RenderLayer* render_layer)
         if (PreferencesManager::get("headless_name") != "") game_server->setServerName(PreferencesManager::get("headless_name"));
         if (PreferencesManager::get("headless_password") != "") game_server->setPassword(PreferencesManager::get("headless_password").upper());
         if (PreferencesManager::get("headless_internet") == "1") game_server->registerOnMasterServer(PreferencesManager::get("registry_registration_url", "http://daid.eu/ee/register.php"));
-        gameGlobalInfo->startScenario(PreferencesManager::get("headless"));
+        gameGlobalInfo->startScenario(PreferencesManager::get("headless"), loadScenarioSettingsFromPrefs());
 
         if (PreferencesManager::get("startpaused") != "1")
             engine->setGameSpeed(1.0);
@@ -507,4 +528,22 @@ void returnToShipSelection(RenderLayer* render_layer)
 void returnToOptionMenu()
 {
     new OptionsMenu();
+}
+
+std::unordered_map<string, string> loadScenarioSettingsFromPrefs()
+{
+    string preferenceValue = PreferencesManager::get("scenario_settings");
+
+    std::unordered_map<string, string> settings = {};
+    if (preferenceValue == "")
+        return settings;
+
+    for(string setting : preferenceValue.split(";"))
+    {
+        auto [key, value] = setting.partition("=");
+        if (!key.empty() && !value.empty())
+            settings[key.strip()] = value.strip();
+    }
+
+    return settings;
 }

@@ -24,7 +24,7 @@ require("utils.lua")
 --	Initialization  --
 ----------------------
 function init()
-	scenario_version = "2.1.0"
+	scenario_version = "2.1.3"
 	print(string.format("     -----     Scenario: Fermi 500     -----     Version %s     -----",scenario_version))
 	print(_VERSION)
 	-- 27 types of goods so far
@@ -504,7 +504,7 @@ function showControlCodes(faction_filter)
 	end
 	table.sort(sorted_names)
 	local output = ""
-	for _, name in ipairs(sorted_names) do
+	for i, name in ipairs(sorted_names) do
 		local faction = ""
 		if code_list[name].faction == "Kraylor" then
 			faction = _("msgGM", " (Kraylor)")
@@ -554,6 +554,20 @@ function mainGMButtonsDuringPause()
 		button_label = string.format("%s%s",button_label,_("buttonGM", "No"))
 	end
 	addGMFunction(button_label,setHazards)
+	addGMFunction(_("buttonGM","Show Statistics"),function()
+		local out = _("msgGM","Not much to show since the game is still paused")
+		print(out)
+		local player_list = getActivePlayerShips()
+		local player_count = string.format(_("msgGM","Total player ships: %i"),#player_list)
+		print(player_count)
+		out = string.format("%s\n%s",out,player_count)
+		for index, p in ipairs(player_list) do
+			local player_line = string.format(_("msgGM","%2i Name:%s, Type:%s"),index,p:getCallSign(),p:getTypeName())
+			print(player_line)
+			out = string.format("%s\n%s",out,player_line)
+		end
+		addGMMessage(out)
+	end)
 end
 function setShootBack()
 	clearGMFunctions()
@@ -678,7 +692,38 @@ function mainGMButtonsAfterPause()
 --			end
 			out = string.format(_("msgGM", "%s%i, %i, %i"),out,details.lap_count,details.waypoint_goal,details.drone_points)
 		end
+		if raceStartDelay < 0 then
+			if player_count == original_player_count then
+				out = string.format(_("msgGM","%s\n\nWith %i racers, we have the following points awarded for final race place:"),out,player_count)
+			else
+				out = string.format(_("msgGM","%s\n\nWith %i racers remaining from the original %i registrants, we have the following points awarded for final race place:"),out,player_count,original_player_count)
+			end
+			local place_name = {
+				_("msgGM","First"),
+				_("msgGM","Second"),
+				_("msgGM","Third"),
+				_("msgGM","Fourth"),
+				_("msgGM","Fifth"),
+				_("msgGM","Sixth"),
+				_("msgGM","Seventh"),
+				_("msgGM","Eighth"),
+				_("msgGM","Ninth"),
+				_("msgGM","Tenth"),
+			}
+			for i=1,#reward_grid[player_count] do
+				if reward_grid[player_count][i] > 0 then
+					out = string.format(_("msgGM", "%s\n    %s:%s"),out,place_name[i],reward_grid[player_count][i])
+				else
+					break
+				end
+			end
+		end
 		addGMMessage(out)
+	end)
+	addGMFunction(_("buttonGM","Show final results"),function()
+		gMsg = _("msgGM","Final results:\nNote: this data appears on the main screen after the race is complete. If the race is not complete, what you see here may not be accurate.")
+		competeResults()
+		addGMMessage(gMsg)
 	end)
 end
 
@@ -994,7 +1039,7 @@ function setStations()
 	totalStations = neutralStations + friendlyStations
 	goods[stationCalvin] = {{"robotic",5,87}}
 	originalStationList = stationList	--save for statistics
-	--Artifacts
+	--Artifacts. Just color (for now)
 	art1 = Artifact():setModel("artifact4"):allowPickup(false):setScanningParameters(2,2):setRadarSignatureInfo(random(4,20),random(2,12), random(7,13))
 	art2 = Artifact():setModel("artifact5"):allowPickup(false):setScanningParameters(2,3):setRadarSignatureInfo(random(2,12),random(7,13), random(4,20))
 	art3 = Artifact():setModel("artifact6"):allowPickup(false):setScanningParameters(3,2):setRadarSignatureInfo(random(7,13),random(4,20), random(2,12))
@@ -1590,13 +1635,13 @@ function handleDockedState()
 	setCommsMessage(oMsg)
 	missilePresence = 0
 	local missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
-	for _, missile_type in ipairs(missile_types) do
+	for i, missile_type in ipairs(missile_types) do
 		missilePresence = missilePresence + comms_source:getWeaponStorageMax(missile_type)
 	end
 	if missilePresence > 0 then
 		addCommsReply(_("ammo-comms", "I need ordnance restocked"), function()
 			setCommsMessage(_("ammo-comms", "What type of ordnance?"))
-			for _, missile_type in ipairs(missile_types) do
+			for i, missile_type in ipairs(missile_types) do
 				if comms_source:getWeaponStorageMax(missile_type) > 0 then
 					addCommsReply(string.format(_("ammo-comms", "%s (%d rep each)"), missile_type, getWeaponCost(missile_type)), function()
 						handleWeaponRestock(missile_type)
@@ -1619,25 +1664,25 @@ function handleDockedState()
 			addCommsReply(_("Back"), commsStation)
 		end)
 	end
-	addCommsReply("Do you upgrade spaceships?", function()
+	addCommsReply(_("upgrade-comms",  "Do you upgrade spaceships?"), function()
 		if comms_target == stationZefram then
-			setCommsMessage("We can upgrade your jump drive maximum range for nanites or robotic goods")
+			setCommsMessage(_("upgrade-comms", "We can upgrade your jump drive maximum range for nanites or robotic goods"))
 		elseif comms_target == stationCarradine then
-			setCommsMessage(string.format("We can increase the speed of your impulse engines by %.2f percent for tritanium or dilithium",impulseBump))
+			setCommsMessage(string.format(_("upgrade-comms", "We can increase the speed of your impulse engines by %.2f percent for tritanium or dilithium"),impulseBump))
 		elseif comms_target == spinStation then
-			setCommsMessage(string.format("We can increase the speed your rotate speed by %.2f percent for %s",spinBump,spinComponent))
+			setCommsMessage(string.format(_("upgrade-comms", "We can increase the speed your rotate speed by %.2f percent for %s"),spinBump,spinComponent))
 		elseif comms_target == stationMarconi then
-			setCommsMessage(string.format("We can increase the range of your beam weapons by %.2f percent for %s",beamRangeBump,beamComponent))
+			setCommsMessage(string.format(_("upgrade-comms", "We can increase the range of your beam weapons by %.2f percent for %s"),beamRangeBump,beamComponent))
 		elseif comms_target == tubeStation then
-			setCommsMessage(string.format("We can add a homing missile tube to your ship for %s",tubeComponent))
+			setCommsMessage(string.format(_("upgrade-comms", "We can add a homing missile tube to your ship for %s"),tubeComponent))
 --			elseif comms_target == stationArcher then
---				setCommsMessage(string.format("We can upgrade the durability of your hull by %.2f percent for %s",hullBump,hullComponent))
+--				setCommsMessage(string.format(_("upgrade-comms", "We can upgrade the durability of your hull by %.2f percent for %s")),hullBump,hullComponent))
 		elseif comms_target == shieldStation then
-			setCommsMessage(string.format("We can upgrade your shields by %.2f percent for %s",shieldBump,shieldComponent))
+			setCommsMessage(string.format(_("upgrade-comms", "We can upgrade your shields by %.2f percent for %s"),shieldBump,shieldComponent))
 		elseif comms_target == stationNefatha then
-			setCommsMessage(string.format("We can upgrade your energy capacity by 25 percent for %s",energyComponent))
+			setCommsMessage(string.format(_("upgrade-comms", "We can upgrade your energy capacity by 25 percent for %s"),energyComponent))
 		else
-			setCommsMessage("We don't upgrade spaceships")
+			setCommsMessage(_("upgrade-comms", "We don't upgrade spaceships"))
 		end
 	end)
 	addCommsReply(_("cartographyOffice-comms", "Visit cartography office"), function()
@@ -1658,7 +1703,7 @@ function handleDockedState()
 				local brochure_stations = ""
 				local sx, sy = comms_target:getPosition()
 				local nearby_objects = getObjectsInRadius(sx,sy,30000)
-				for _, obj in ipairs(nearby_objects) do
+				for i, obj in ipairs(nearby_objects) do
 					if obj.typeName == "SpaceStation" then
 						if not obj:isEnemy(comms_target) then
 							if brochure_stations == "" then
@@ -1676,7 +1721,7 @@ function handleDockedState()
 				local brochure_goods = ""
 				local sx, sy = comms_target:getPosition()
 				local nearby_objects = getObjectsInRadius(sx,sy,30000)
-				for _, obj in ipairs(nearby_objects) do
+				for i, obj in ipairs(nearby_objects) do
 					if obj.typeName == "SpaceStation" then
 						if not obj:isEnemy(comms_target) then
 							if goods[obj] ~= nil then
@@ -1705,7 +1750,7 @@ function handleDockedState()
 				local sx, sy = comms_target:getPosition()
 				local nearby_objects = getObjectsInRadius(sx,sy,50000)
 				local stations_known = 0
-				for _, obj in ipairs(nearby_objects) do
+				for i, obj in ipairs(nearby_objects) do
 					if obj.typeName == "SpaceStation" then
 						if not obj:isEnemy(comms_target) then
 							stations_known = stations_known + 1
@@ -1736,7 +1781,7 @@ function handleDockedState()
 				local nearby_objects = getObjectsInRadius(sx,sy,50000)
 				local button_count = 0
 				local by_goods = {}
-				for _, obj in ipairs(nearby_objects) do
+				for i, obj in ipairs(nearby_objects) do
 					if obj.typeName == "SpaceStation" then
 						if not obj:isEnemy(comms_target) then
 							if goods[obj] ~= nil then
@@ -1948,9 +1993,9 @@ function handleDockedState()
 		until(gi > #goods[comms_source])
 		if naniteQuantity > 0 then
 			if comms_source:hasJumpDrive() then
-				addCommsReply("Provide nanites for jump drive upgrade", function()
+				addCommsReply(_("upgrade-comms", "Provide nanites for jump drive upgrade"), function()
 					if comms_source.jumpUpgrade then
-						setCommsMessage("You already have the upgrade")
+						setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 					else
 						decrementPlayerGoods("nanites")
 						comms_source.cargo = comms_source.cargo + 1
@@ -1960,16 +2005,16 @@ function handleDockedState()
 						else
 							comms_source:setJumpDriveRange(5000,55000)
 						end
-						setCommsMessage("Your jump drive has been upgraded")
+						setCommsMessage(_("upgrade-comms", "Your jump drive has been upgraded"))
 					end
 				end)
 			end
 		end
 		if roboticQuantity > 0 then
 			if comms_source:hasJumpDrive() then
-				addCommsReply("Provide robotic goods for jump drive upgrade", function()
+				addCommsReply(_("upgrade-comms", "Provide robotic goods for jump drive upgrade"), function()
 					if comms_source.jumpUpgrade then
-						setCommsMessage("You already have the upgrade")
+						setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 					else
 						decrementPlayerGoods("robotic")
 						comms_source.cargo = comms_source.cargo + 1
@@ -1979,7 +2024,7 @@ function handleDockedState()
 						else
 							comms_source:setJumpDriveRange(5000,55000)
 						end
-						setCommsMessage("Your jump drive has been upgraded")
+						setCommsMessage(_("upgrade-comms", "Your jump drive has been upgraded"))
 					end
 				end)
 			end
@@ -1999,28 +2044,28 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])		
 		if tritaniumQuantity > 0 then
-			addCommsReply(string.format("Provide tritanium for %.2f percent impulse engine speed upgrade",impulseBump), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide tritanium for %.2f percent impulse engine speed upgrade"),impulseBump), function()
 				if comms_source.impulseUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods("tritanium")
 					comms_source.cargo = comms_source.cargo + 1
 					comms_source.impulseUpgrade = true
 					comms_source:setImpulseMaxSpeed(comms_source:getImpulseMaxSpeed()*(1+impulseBump/100))
-					setCommsMessage("Your impulse engine speed has been upgraded")
+					setCommsMessage(_("upgrade-comms", "Your impulse engine speed has been upgraded"))
 				end
 			end)
 		end
 		if dilithiumQuantity > 0 then
-			addCommsReply(string.format("Provide dilithium for %f percent impulse engine speed upgrade",impulseBump), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide dilithium for %f percent impulse engine speed upgrade"),impulseBump), function()
 				if comms_source.impulseUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods("dilithium")
 					comms_source.cargo = comms_source.cargo + 1
 					comms_source.impulseUpgrade = true
 					comms_source:setImpulseMaxSpeed(comms_source:getImpulseMaxSpeed()*(1+impulseBump/100))
-					setCommsMessage("Your impulse engine speed has been upgraded")
+					setCommsMessage(_("upgrade-comms", "Your impulse engine speed has been upgraded"))
 				end
 			end)
 		end
@@ -2035,15 +2080,15 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])
 		if spinQuantity > 0 then
-			addCommsReply(string.format("Provide %s for %.2f percent maneuver speed upgrade",spinComponent,spinBump), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide %s for %.2f percent maneuver speed upgrade"),spinComponent,spinBump), function()
 				if comms_source.spinUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods(spinComponent)
 					comms_source.cargo = comms_source.cargo + 1
 					comms_source.spinUpgrade = true
 					comms_source:setRotationMaxSpeed(comms_source:getRotationMaxSpeed()*(1+spinBump/100))
-					setCommsMessage("Your spin speed has been upgraded")
+					setCommsMessage(_("upgrade-comms", "Your spin speed has been upgraded"))
 				end
 			end)
 		end
@@ -2058,9 +2103,9 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])
 		if beamQuantity > 0 then
-			addCommsReply(string.format("Provide %s for %.2f percent beam range upgrade",beamComponent,beamRangeBump), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide %s for %.2f percent beam range upgrade"),beamComponent,beamRangeBump), function()
 				if comms_source.beamRangeUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					if comms_source:getBeamWeaponRange(0) > 0 then
 						decrementPlayerGoods(beamComponent)
@@ -2074,9 +2119,9 @@ function handleDockedState()
 							tempDirection = comms_source:getBeamWeaponDirection(b)
 							comms_source:setBeamWeapon(b,tempArc,tempDirection,newRange,tempCycle,tempDamage)
 						end	
-						setCommsMessage("Your beam range has been upgraded")					
+						setCommsMessage(_("upgrade-comms", "Your beam range has been upgraded"))
 					else
-						setCommsMessage("Your ship does not support a beam weapon upgrade")
+						setCommsMessage(_("upgrade-comms", "Your ship does not support a beam weapon upgrade"))
 					end
 				end
 			end)
@@ -2092,9 +2137,9 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])
 		if tubeQuantity > 0 then
-			addCommsReply(string.format("Provide %s for additional homing missile tube",tubeComponent), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide %s for additional homing missile tube"),tubeComponent), function()
 				if comms_source.tubeUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods(tubeComponent)
 					comms_source.cargo = comms_source.cargo + 1
@@ -2105,7 +2150,7 @@ function handleDockedState()
 					comms_source:setWeaponTubeExclusiveFor(originalTubes, "Homing")
 					comms_source:setWeaponStorageMax("Homing", comms_source:getWeaponStorageMax("Homing") + 2)
 					comms_source:setWeaponStorage("Homing", comms_source:getWeaponStorage("Homing") + 2)
-					setCommsMessage("You now have an additional homing missle tube")
+					setCommsMessage(_("upgrade-comms", "You now have an additional homing missile tube"))
 				end
 			end)
 		end
@@ -2120,15 +2165,15 @@ function handleDockedState()
 --			gi = gi + 1
 --		until(gi > #goods[comms_source])
 --		if hullQuantity > 0 then
---			addCommsReply(string.format("Provide %s for %.2f percent hull upgrade",hullComponent,hullBump), function()
+--			addCommsReply(string.format(_("upgrade-comms", "Provide %s for %.2f percent hull upgrade"),hullComponent,hullBump), function()
 --				if comms_source.hullUpgrade then
---					setCommsMessage("You already have the upgrade")
+--					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 --				else
 --					decrementPlayerGoods(hullComponent)
 --					comms_source.cargo = comms_source.cargo + 1
 --					comms_source.hullUpgrade = true
 --					comms_source:setHullMax(comms_source:getHullMax()*(1+hullBump/100))
---					setCommsMessage("You now have an upgraded hull")
+--					setCommsMessage(_("upgrade-comms", "You now have an upgraded hull"))
 --				end
 --			end)
 --		end
@@ -2143,15 +2188,15 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])
 		if energyQuantity > 0 then
-			addCommsReply(string.format("Provide %s for 25 percent energy capacity upgrade",energyComponent), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide %s for 25 percent energy capacity upgrade"),energyComponent), function()
 				if comms_source.energyUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods(energyComponent)
 					comms_source.cargo = comms_source.cargo + 1
 					comms_source.energyUpgrade = true
 					comms_source:setMaxEnergy(comms_source:getMaxEnergy()*1.25)
-					setCommsMessage("You now have upgraded energy capacity")
+					setCommsMessage(_("upgrade-comms", "You now have upgraded energy capacity"))
 				end
 			end)
 		end
@@ -2166,9 +2211,9 @@ function handleDockedState()
 			gi = gi + 1
 		until(gi > #goods[comms_source])
 		if shieldQuantity > 0 then
-			addCommsReply(string.format("Provide %s for %.2f percent front shield upgrade",shieldComponent,shieldBump), function()
+			addCommsReply(string.format(_("upgrade-comms", "Provide %s for %.2f percent front shield upgrade"),shieldComponent,shieldBump), function()
 				if comms_source.frontShieldUpgrade then
-					setCommsMessage("You already have the upgrade")
+					setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 				else
 					decrementPlayerGoods(shieldComponent)
 					comms_source.cargo = comms_source.cargo + 1
@@ -2179,20 +2224,20 @@ function handleDockedState()
 					else
 						comms_source:setShieldsMax(comms_source:getShieldMax(0)*(1+shieldBump/100), comms_source:getShieldMax(1))
 					end
-					setCommsMessage("You now have an upgraded front shield")
+					setCommsMessage(_("upgrade-comms", "You now have an upgraded front shield"))
 				end
 			end)
 			if comms_source:getShieldCount() > 1 then
-				addCommsReply(string.format("Provide %s for %.2f percent rear shield upgrade",shieldComponent,shieldBump), function()
+				addCommsReply(string.format(_("upgrade-comms", "Provide %s for %.2f percent rear shield upgrade"),shieldComponent,shieldBump), function()
 					if comms_source.rearShieldUpgrade then
-						setCommsMessage("You already have the upgrade")
+						setCommsMessage(_("upgrade-comms", "You already have the upgrade"))
 					else
 						decrementPlayerGoods(shieldComponent)
 						comms_source.cargo = comms_source.cargo + 1
 						comms_source.rearShieldUpgrade = true
 						si = comms_source:getShieldCount()
 						comms_source:setShieldsMax(comms_source:getShieldMax(0), comms_source:getShieldMax(1)*(1+shieldBump/100))
-						setCommsMessage("You now have an upgraded rear shield")
+						setCommsMessage(_("upgrade-comms", "You now have an upgraded rear shield"))
 					end				
 				end)
 			end
@@ -2258,33 +2303,49 @@ function handleUndockedState()
 	setCommsMessage(oMsg)
  	addCommsReply(_("station-comms", "I need information"), function()
 		setCommsMessage(_("station-comms", "What kind of information do you need?"))
-		addCommsReply("Do you upgrade spaceships?", function()
+		addCommsReply(_("upgrade-comms","Do you upgrade spaceships?"), function()
 			if comms_target == stationZefram then
-				setCommsMessage("We can upgrade your jump drive maximum range for nanites or robotic goods")
+				setCommsMessage(_("upgrade-comms","We can upgrade your jump drive maximum range for nanites or robotic goods"))
 			elseif comms_target == stationCarradine then
-				setCommsMessage(string.format("We can increase the speed of your impulse engines by %.2f percent for tritanium or dilithium",impulseBump))
+				setCommsMessage(string.format(_("upgrade-comms","We can increase the speed of your impulse engines by %.2f percent for tritanium or dilithium"),impulseBump))
 			elseif comms_target == spinStation then
-				setCommsMessage(string.format("We can increase the speed your rotate speed by %.2f percent for %s",spinBump,spinComponent))
+				setCommsMessage(string.format(_("upgrade-comms","We can increase the speed your rotate speed by %.2f percent for %s"),spinBump,spinComponent))
 			elseif comms_target == stationMarconi then
-				setCommsMessage(string.format("We can increase the range of your beam weapons by %.2f percent for %s",beamRangeBump,beamComponent))
+				setCommsMessage(string.format(_("upgrade-comms","We can increase the range of your beam weapons by %.2f percent for %s"),beamRangeBump,beamComponent))
 			elseif comms_target == tubeStation then
-				setCommsMessage(string.format("We can add a homing missile tube to your ship for %s",tubeComponent))
+				setCommsMessage(string.format(_("upgrade-comms","We can add a homing missile tube to your ship for %s"),tubeComponent))
 --			elseif comms_target == stationArcher then
---				setCommsMessage(string.format("We can upgrade the durability of your hull by %.2f percent for %s",hullBump,hullComponent))
+--				setCommsMessage(string.format(_("upgrade-comms", "We can upgrade the durability of your hull by %.2f percent for %s"),hullBump,hullComponent))
 			elseif comms_target == shieldStation then
-				setCommsMessage(string.format("We can upgrade your shields by %.2f percent for %s",shieldBump,shieldComponent))
+				setCommsMessage(string.format(_("upgrade-comms","We can upgrade your shields by %.2f percent for %s"),shieldBump,shieldComponent))
 			elseif comms_target == stationNefatha then
-				setCommsMessage(string.format("We can upgrade your energy capacity by 25 percent for %s",energyComponent))
+				setCommsMessage(string.format(_("upgrade-comms","We can upgrade your energy capacity by 25 percent for %s"),energyComponent))
 			else
-				setCommsMessage("We don't upgrade spaceships")
+				setCommsMessage(_("upgrade-comms","We don't upgrade spaceships"))
 			end
 		end)
+		if comms_target == stationTimer then
+			addCommsReply(_("station-comms","How far am I from the race start point?"),function()
+				local p_x, p_y = comms_source:getPosition()
+				local current_distance = distance(p_x, p_y, racePoint1x, racePoint1y)
+				local qualify = _("station-comms","not close enough to qualify for the start of the race")
+				if current_distance < 5000 then
+					qualify = _("station-comms","close enough to qualify for the start of the race")
+				end
+				current_distance = current_distance/1000
+				if current_distance <= 1 then
+					setCommsMessage(string.format(_("station-comms","%s, my messaging terminal says you're %.1f unit away, %s."),comms_source:getCallSign(),current_distance,qualify))
+				else
+					setCommsMessage(string.format(_("station-comms","%s, my messaging terminal says you're %.1f units away, %s."),comms_source:getCallSign(),current_distance,qualify))
+				end
+			end)
+		end		
 	end)
 	if comms_source:isFriendly(comms_target) then
 		addCommsReply(_("orders-comms", "What are my current orders?"), function()
 			ordMsg = primaryOrders
 			if raceStartDelay > 0 then
-				ordMsg = ordMsg .. string.format(_("orders-comms", "\n%i Seconds remain until start of race"),raceStartDelay)
+				ordMsg = ordMsg .. string.format(_("orders-comms", "\n%i Seconds remain until start of race"),math.floor(raceStartDelay))
 			else
 				if comms_source.goal ~= nil then
 					ordMsg = ordMsg .. string.format(_("orders-comms", "\nImmediate goal: race waypoint %i"),comms_source.goal)
@@ -2466,7 +2527,7 @@ function friendlyComms(comms_data)
 		setCommsMessage(msg);
 		addCommsReply(_("Back"), commsShip)
 	end)
-	for _, obj in ipairs(comms_target:getObjectsInRange(5000)) do
+	for i, obj in ipairs(comms_target:getObjectsInRange(5000)) do
 		if obj.typeName == "SpaceStation" and not comms_target:isEnemy(obj) then
 			addCommsReply(string.format(_("shipAssist-comms", "Dock at %s"), obj:getCallSign()), function()
 				setCommsMessage(string.format(_("shipAssist-comms", "Docking at %s."), obj:getCallSign()));
@@ -2515,7 +2576,7 @@ function enemyComms(comms_data)
 			return true
 		end
 	else
-		setCommsMessage("I belong to " .. comms_target.owner)
+		setCommsMessage(_("shipEnemy-comms", "I belong to ") .. comms_target.owner)
 		addCommsReply(_("Back"), commsShip)
 	end
 	return false
@@ -2895,16 +2956,17 @@ function competeResults()
 	gMsg = gMsg .. _("msgMainscreen", "\nOrdered by score. Place, ship name, score, time in seconds, place points, drone points")
 	print("Final Statistics:")
 	print("Rank","Score","Place","Drones","Time","Name")
-	for index, item in ipairs(sorted_stat_list) do
-		local time = 0
-		if item.time ~= nil then
-			time = item.time
+	if #sorted_stat_list > 0 then
+		for index, item in ipairs(sorted_stat_list) do
+			local time = 0
+			if item.time ~= nil then
+				time = item.time
+			end
+			print(index,item.score,item.rank_points,item.drone_points,time,item.name)
+			gMsg = gMsg .. string.format(_("msgMainscreen", "\n%i, %s, %i, %.2f, %i, %i"),index,item.name,item.score,time,item.rank_points,item.drone_points)
 		end
-		print(index,item.score,item.rank_points,item.drone_points,time,item.name)
-		gMsg = gMsg .. string.format(_("msgMainscreen", "\n%i, %s, %i, %.2f, %i, %i"),index,item.name,item.score,time,item.rank_points,item.drone_points)
-		if index == 1 then
-			gMsg = gMsg .. _("msgMainscreen", "\n\n\n")
-		end
+	else
+		gMsg = _("msgMainscreen","Nobody finished the race.")
 	end
 --	previous method (deprecated)
 --[[
@@ -2923,7 +2985,7 @@ function competeResults()
 		for pl=1,#playerList do
 			if playerList[pl].timePoints == nil then
 				playerList[pl].timePoints = 0
-				gMsg = gMsg .. string.format("\n%s time: %.2f seconds. Time rank: %s. Placement points: 0",playerList[pl]:getCallSign(),playerList[pl].raceTime,playerList[pl].timeRank)
+				gMsg = gMsg .. string.format(_("msgMainscreen", "\n%s time: %.2f seconds. Time rank: %s. Placement points: 0"),playerList[pl]:getCallSign(),playerList[pl].raceTime,playerList[pl].timeRank)
 			end
 		end
 	end
@@ -3116,14 +3178,14 @@ function gatherStats(final_score)
 	table.sort(sorted_score_list,function(a,b)
 		return a.rank > b.rank
 	end)
---	for _,item in ipairs(sorted_score_list) do
+--	for i,item in ipairs(sorted_score_list) do
 --		print(item.name, item.drone_points, item.rank)
 --	end
 	if sorted_score_list ~= nil and #sorted_score_list > 0 and player_count > 0 then
 		local prev_value = sorted_score_list[1].rank
 		local place_index = 1
 		local reward_index = 1
-		for _, item in ipairs(sorted_score_list) do
+		for i, item in ipairs(sorted_score_list) do
 			if item.rank ~= prev_value then
 				reward_index = place_index
 			end
@@ -3152,7 +3214,7 @@ function gatherStats(final_score)
 			return a.score > b.score
 		end)
 		print("Score","Place","Drones","Name","Laps","WP Goal")
-		for _, item in ipairs(sorted_stat_list) do
+		for i, item in ipairs(sorted_stat_list) do
 			print(item.score,item.rank_points,item.drone_points,item.name,item.lap_count,item.waypoint_goal)
 		end
 		return stat_list, sorted_stat_list
@@ -3285,12 +3347,12 @@ function update(delta)
 	if raceInstructionMessage ~= "sent" then
 		game_state = "introducing"
 		raceInstructionMessage = "sent"
-		primaryOrders = string.format("Start race on time at waypoint 1\nRace Length: %f units",raceLength)
+		primaryOrders = string.format(_("raceOrders-comms", "Start race on time at waypoint 1\nRace Length: %f units"),raceLength)
 		for p1idx=1,32 do
 			local p1 = getPlayerShip(p1idx)
 			if p1 ~= nil and p1:isValid() then
-				p1:addToShipLog("Race starts in 10 minutes. Be at waypoint 1 on time or forfeit","Magenta")
-				p1:addToShipLog(string.format("Today's race length: %.1f units",raceLength),"Magenta")
+				p1:addToShipLog(_("raceOrders-shipLog", "Race starts in 10 minutes. Be at waypoint 1 on time or forfeit"),"Magenta")
+				p1:addToShipLog(string.format(_("raceOrders-shipLog", "Today's race length: %.1f units"),raceLength),"Magenta")
 			end
 		end
 	end
@@ -3298,7 +3360,7 @@ function update(delta)
 		game_state = "countdown"
 		--before race start
 		raceStartDelay = raceStartDelay - delta
-		stationTimer:setCallSign(string.format("Race Start Countdown: %.2f",raceStartDelay))
+		stationTimer:setCallSign(string.format(_("race-", "Race Start Countdown: %.2f"),raceStartDelay))
 		if stationsBuilt == "done" then
 			for p2idx=1,32 do
 				p2 = getPlayerShip(p2idx)
@@ -3310,11 +3372,11 @@ function update(delta)
 						p2:commandAddWaypoint(racePoint4x,racePoint4y)
 					end
 					if p2.readyMessage ~= "done" and raceStartDelay > 1 and raceStartDelay < 2 then
-						p2:addToShipLog("Ready...","Blue")
+						p2:addToShipLog(_("race-shipLog", "Ready..."),"Blue")
 						p2.readyMessage = "done"
 					end
 					if p2.setMessage ~= "done" and raceStartDelay < 1 then
-						p2:addToShipLog("Set...","Magenta")
+						p2:addToShipLog(_("race-shipLog", "Set..."),"Magenta")
 						p2.setMessage = "done"
 					end
 				end
@@ -3326,7 +3388,7 @@ function update(delta)
 		if startLineCheck ~= "done" then
 			startLineCheck = "done"
 			raceTimer = 0
-			primaryOrders = "Complete race. Win if possible."
+			primaryOrders = _("raceOrders-comms", "Complete race. Win if possible.")
 			player_start_list = {}
 			original_player_count = player_count
 			player_count = 0
@@ -3339,7 +3401,7 @@ function update(delta)
 						p4.laps = 0
 						p4.laptimer = 0
 						p4.legtimer = 0
-						p4:addToShipLog("Go!","Red")
+						p4:addToShipLog(_("raceOrders-shipLog", "Go!"),"Red")
 						player_start_list[p4:getCallSign()] = p4
 						player_count = player_count + 1
 					else
@@ -3360,7 +3422,7 @@ function update(delta)
 				end
 			end
 		else
-			stationTimer:setCallSign(string.format("Race Run Time %.2f",raceTimer))
+			stationTimer:setCallSign(string.format(_("race-", "Race Run Time %.2f"),raceTimer))
 			raceTimer = raceTimer + delta
 			if hazards then
 				hazardDelay = hazardDelay - 1
@@ -3384,14 +3446,14 @@ function update(delta)
 			end
 			if follow_up_message == nil then
 				follow_up_message = "sent"
-				local msg = "The race has begun!"
+				local msg = _("race-", "The race has begun!")
 				for name, p in pairs(player_start_list) do
 					p:addToShipLog(msg,"Magenta")
 				end
 				if player_count == original_player_count then
-					msg = string.format("With %i racers, we have the following points awarded for final race place:",player_count)
+					msg = string.format(_("race-", "With %i racers, we have the following points awarded for final race place:"),player_count)
 				else
-					msg = string.format("With %i racers remaining from the original %i registrants, we have the following points awarded for final race place:",player_count,original_player_count)
+					msg = string.format(_("race-", "With %i racers remaining from the original %i registrants, we have the following points awarded for final race place:"),player_count,original_player_count)
 				end
 				for name, p in pairs(player_start_list) do
 					p:addToShipLog(msg,"Magenta")
@@ -3409,16 +3471,22 @@ function update(delta)
 					"Ninth",
 					"Tenth",
 				}
-				for i=1,#reward_grid[player_count] do
-					if reward_grid[player_count][i] > 0 then
-						if i > 1 then
-							msg = msg .. ", " .. place_name[i] .. ":" .. reward_grid[player_count][i]
+				if player_count > 0 then
+					for i=1,#reward_grid[player_count] do
+						if reward_grid[player_count][i] > 0 then
+							if i > 1 then
+								msg = msg .. ", " .. place_name[i] .. ":" .. reward_grid[player_count][i]
+							else
+								msg = place_name[i] .. ":" .. reward_grid[player_count][i]
+							end
 						else
-							msg = place_name[i] .. ":" .. reward_grid[player_count][i]
+							break
 						end
-					else
-						break
 					end
+				else
+					game_state = "aborted"
+					globalMessage(_("race-msgMainscreen","Race aborted. Nobody made it to the starting line"))
+					victory("Exuari")
 				end
 				for name, p in pairs(player_start_list) do
 					p:addToShipLog(msg,"Magenta")
@@ -3445,7 +3513,7 @@ function update(delta)
 							end
 						end
 					end
-					local name_tag_text = string.format(_("-tabHelms&Tactical&Singlepilot", "%s in %s"),p5:getCallSign(),p5:getSectorName())
+					local name_tag_text = string.format(_("race-tabHelms&Tactical&Singlepilot", "%s in %s"),p5:getCallSign(),p5:getSectorName())
 					if p5:hasPlayerAtPosition("Helms") then
 						p5.name_tag_helm = "name_tag_helm"
 						p5:addCustomInfo("Helms",p5.name_tag_helm,name_tag_text)
@@ -3466,7 +3534,7 @@ function update(delta)
 							else
 								lapString = "laps"
 							end
-							p5:addToShipLog(string.format(_("-shipLog", "Waypoint 2 met. Go to waypoint 3. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
+							p5:addToShipLog(string.format(_("race-shipLog", "Waypoint 2 met. Go to waypoint 3. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
 							p5.legtimer = 0
 						end
 					elseif p5.goal == 3 then
@@ -3477,7 +3545,7 @@ function update(delta)
 							else
 								lapString = "laps"
 							end
-							p5:addToShipLog(string.format(_("-shipLog", "Waypoint 3 met. Go to waypoint 4. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
+							p5:addToShipLog(string.format(_("race-shipLog", "Waypoint 3 met. Go to waypoint 4. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
 							p5.legtimer = 0
 						end
 					elseif p5.goal == 4 then
@@ -3488,7 +3556,7 @@ function update(delta)
 							else
 								lapString = "laps"
 							end
-							p5:addToShipLog(string.format(_("-shipLog", "Waypoint 4 met. Go to waypoint 1. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
+							p5:addToShipLog(string.format(_("race-shipLog", "Waypoint 4 met. Go to waypoint 1. Leg took %f seconds. You have completed %i %s."),p5.legtimer,p5.laps,lapString),"Magenta")
 							p5.legtimer = 0
 						end
 					elseif p5.goal == 1 then
@@ -3496,7 +3564,7 @@ function update(delta)
 							p5.laps = p5.laps + 1
 							if p5.laps >= 3 then
 								p5.raceTime = raceTimer
-								p5:addToShipLog(string.format(_("-shipLog", "Completed race. Race time in seconds: %f"),p5.raceTime),"Magenta")
+								p5:addToShipLog(string.format(_("race-shipLog", "Completed race. Race time in seconds: %f"),p5.raceTime),"Magenta")
 							else
 								p5.goal = 2
 								if p5.laps == 1 then
@@ -3504,7 +3572,7 @@ function update(delta)
 								else
 									lapString = "laps"
 								end
-								p5:addToShipLog(string.format(_("-shipLog", "Waypoint 1 met. Go to waypoint 2. Leg took %f seconds. You have completed %i %s. Lap took %f seconds."),p5.legtimer,p5.laps,lapString,p5.laptimer),"Magenta")
+								p5:addToShipLog(string.format(_("race-shipLog", "Waypoint 1 met. Go to waypoint 2. Leg took %f seconds. You have completed %i %s. Lap took %f seconds."),p5.legtimer,p5.laps,lapString,p5.laptimer),"Magenta")
 								p5.laptimer = 0
 								p5.legtimer = 0
 							end
@@ -3529,20 +3597,34 @@ function update(delta)
 					end
 				end
 			end
-			if finished_racers < #reward_grid[player_count] and reward_grid[player_count][finished_racers + 1] == 0 then
-				if patienceTimeLimit == original_patience_time_limit then
-					patienceTimeLimit = raceTimer + 10		--wait 10 seconds for last place player ship to finish
+			if player_count > 0 then
+				if finished_racers < #reward_grid[player_count] and reward_grid[player_count][finished_racers + 1] == 0 then
+					if patienceTimeLimit == original_patience_time_limit then
+						patienceTimeLimit = raceTimer + 10		--wait 10 seconds for last place player ship to finish
+					end
 				end
+			else
+				game_state = "aborted"
+				globalMessage(_("msgMainscreen","Race aborted. Nobody made it to the starting line"))
+				victory("Exuari")
 			end
 			if finished_racers >= viable_racers then
 				allRacersFinished()
 				game_state = "complete"
-				victory("Human Navy")
+				if player_count == 0 then
+					victory("Exuari")
+				else
+					victory("Human Navy")
+				end
 			end
 			if raceTimer > patienceTimeLimit then
 				raceTimerExpired()
 				game_state = "expired"
-				victory("Human Navy")
+				if player_count == 0 then
+					victory("Exuari")
+				else
+					victory("Human Navy")
+				end
 			end
 		end
 	end

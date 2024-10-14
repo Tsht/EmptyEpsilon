@@ -527,21 +527,26 @@ void fillDefaultDatabaseData()
 
         if (ship_template->impulse_speed > 0.0f)
         {
-            entry->addKeyValue(tr("database", "Move speed"), string(ship_template->impulse_speed * 60 / 1000, 1) + " u/min");
-            entry->addKeyValue(tr("database", "Reverse move speed"), string(ship_template->impulse_reverse_speed * 60 / 1000, 1) + " u/min");
+            entry->addKeyValue(tr("database", "Move speed"), tr("database","{speed} u/min").format({{"speed", string(ship_template->impulse_speed * 60 / 1000, 1)}}));
+            entry->addKeyValue(tr("database", "Reverse move speed"), tr("database","{speed} u/min").format({{"speed", string(ship_template->impulse_reverse_speed * 60 / 1000, 1)}}));
         }
         if (ship_template->turn_speed > 0.0f) 
         {
-            entry->addKeyValue(tr("database", "Turn speed"), string(ship_template->turn_speed, 1) + " deg/sec");
+            entry->addKeyValue(tr("database", "Turn speed"), tr("database","{turnspeed} deg/sec").format({{"turnspeed", string(ship_template->turn_speed, 1)}}));
         }
         if (ship_template->warp_speed > 0.0f)
         {
             entry->addKeyValue(tr("database", "Has warp drive"), tr("hasdrive","True"));
-            entry->addKeyValue(tr("database", "Warp speed"), string(int(ship_template->warp_speed)));
+            entry->addKeyValue(tr("database", "Warp speed"), tr("database","{speed} u/min").format({{"speed", string(ship_template->warp_speed * 60 / 1000, 1)}}));
         }
         if (ship_template->has_jump_drive)
         {
-            entry->addKeyValue(tr("Has jump drive"), tr("hasdrive","True"));
+            entry->addKeyValue(
+                tr("database", "Jump range"), 
+                tr("database","{mindistance} - {maxdistance} u").format({
+                    {"mindistance", string(ship_template->jump_drive_min_distance / 1000, 0)},
+                    {"maxdistance", string(ship_template->jump_drive_max_distance / 1000, 0)}
+                }));
         }
         int beam_weapons_count = 0;
         for(int n=0; n<max_beam_weapons; n++)

@@ -74,6 +74,8 @@ private:
     float average_energy_delta;
 
     void addSystemEffect(string key, string value, glm::u8vec4 color = glm::u8vec4(255,255,255,255));
+    bool set_power_active[SYS_COUNT] = {false};
+    bool set_coolant_active[SYS_COUNT] = {false};
     void selectSystem(ESystem system);
 
     string toNearbyIntString(float value);

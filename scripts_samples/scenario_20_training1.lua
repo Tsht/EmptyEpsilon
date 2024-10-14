@@ -1,11 +1,11 @@
 -- Name: Training: Cruiser
 -- Type: Basic
--- Description: Basic Training Cource
+-- Description: Basic Training Course
 ---
 --- Objective: Destroy all enemy ships in the area.
 ---
 --- Description:
---- During this training your will learn to coordinate the actions of your crew and destoy an Exuari training ground.
+--- During this training you will learn to coordinate the actions of your crew and destroy an Exuari training ground.
 ---
 --- Your ship is a Phobos light cruiser - the most common vessel in the navy.
 ---
@@ -18,37 +18,6 @@ require("utils.lua")
 --- Ship creation functions
 function createExuariWeakInterceptor()
 	return CpuShip():setFaction("Exuari"):setTemplate("Dagger"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
-end
-
-function copyShipDBEntry(base_ship_template,new_ship)
-  ship_db = queryScienceDatabase("Ships")
-
-  -- Search each Ships class's entry for the base ship
-  for k,entry in ipairs(ship_db:getEntries())
-  do
-    base_ship_entry = entry:getEntryByName(base_ship_template)
-    if base_ship_entry ~= nil
-    then
-      break;
-    end
-  end
-
-  -- Create a new Exuari DB entry for the new ship
-  exuari_ship_db = ship_db:getEntryByName("Exuari")
-  new_ship_entry = exuari_ship_db:addEntry(new_ship:getTypeName())
-
-  -- Copy base ship data to the new entry
-  for k,v in pairs(base_ship_entry:getKeyValues())
-  do
-    new_ship_entry:setKeyValue(k,v)
-  end
-
-  new_ship_entry:setImage(base_ship_entry:getImage())
-  new_ship_entry:setLongDescription(base_ship_entry:getLongDescription())
-  -- Impossible without a getModelName() function
-  -- new_ship_entry:setModelName(base_ship_entry:getModelName())
-
-  return new_ship_entry
 end
 
 function createExuariWeakBomber()
@@ -64,37 +33,17 @@ function createExuariBomber()
 end
 
 function createExuariTransport()
-	return CpuShip():setFaction("Exuari"):setTemplate("Personnel Freighter 1"):setTypeName("Exuari transport")
+	return CpuShip():setFaction("Exuari"):setTemplate("Personnel Freighter 1"):setDescriptionForScanState("simple",_("scienceDescription-shipname","Exuari transport"))
 end
-
--- Create a dummy ship to populate the ScienceDatabase entry, then destroy it
-init_transport = createExuariTransport()
-init_transport_entry = copyShipDBEntry("Personnel Freighter 1", init_transport)
--- init_transport_entry:setLongDescription("The Exuari transport transports Exuari")
-init_transport_entry:setModelDataName("transport_1_1") -- manually entered from finding Personnel Freighter in shiptemplates
-init_transport:destroy()
 
 function createExuariFreighter()
-	return CpuShip():setFaction("Exuari"):setTemplate("Goods Freighter 5"):setTypeName("Exuari freighter")
+	return CpuShip():setFaction("Exuari"):setTemplate("Goods Freighter 5"):setDescriptionForScanState("simple",_("scienceDescription-shipname","Exuari freighter"))
 end
-
--- Create a dummy ship to populate the ScienceDatabase entry, then destroy it
-init_transport = createExuariFreighter()
-init_transport_entry = copyShipDBEntry("Goods Freighter 5", init_transport)
--- init_transport_entry:setLongDescription("The Exuari transport transports Exuari")
-init_transport_entry:setModelDataName("transport_2_5") -- manually entered from finding Goods Freighter in shiptemplates
-init_transport:destroy()
 
 function createExuariShuttle()
-	return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
+	return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setDescriptionForScanState("simple",_("scienceDescription-shipname","Exuari shuttle")):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
 end
 
--- Create a dummy ship to populate the ScienceDatabase entry, then destroy it
-init_transport = createExuariShuttle()
-init_transport_entry = copyShipDBEntry("Racer", init_transport)
--- init_transport_entry:setLongDescription("The Exuari transport transports Exuari")
-init_transport_entry:setModelDataName("small_frigate_1") -- manually entered from finding Racer in shiptemplates
-init_transport:destroy()
 
 -- init
 function init()
@@ -129,9 +78,9 @@ function commsInstr()
         instr1 = true
         command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
 
-In this training mission you will practice the basic controls of a Phobos light cruiser.
+In this training mission, you will practice the basic controls of a Phobos light cruiser.
 Since this is not a tutorial, you will be on your own to decide how to destroy all enemy targets in an Exuari training ground.
-There will be not much resistance, so you can try different approaches and tactics savely.
+There will be not much resistance, so you can try different approaches and tactics safely.
 
 Here's your chance to beat up some helpless opponents.
 Commander Saberhagen out.]]))
@@ -170,7 +119,7 @@ function update(delta)
             table.remove(enemyList, i)
         -- Note: table.remove() inside iteration causes the next element to be skipped.
         -- This means in each update-cycle max half of the elements are removed.
-        -- It does not matter here, since update is called regulary.
+        -- It does not matter here, since update is called regularly.
         end
     end
     if #enemyList == 0 then
@@ -196,4 +145,3 @@ function update(delta)
 
     commsInstr()
 end
-

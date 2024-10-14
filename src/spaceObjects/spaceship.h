@@ -450,7 +450,7 @@ public:
     float getSystemPowerFactor(ESystem system) { if (system >= SYS_COUNT) return 0.f; if (system <= SYS_None) return 0.f; return systems[system].power_factor; }
     void setSystemPowerFactor(ESystem system, float factor) { if (system >= SYS_COUNT) return; if (system <= SYS_None) return; systems[system].power_factor = factor; }
     float getSystemCoolant(ESystem system) { if (system >= SYS_COUNT) return 0.0; if (system <= SYS_None) return 0.0; return systems[system].coolant_level; }
-    void setSystemCoolant(ESystem system, float coolant) { if (system >= SYS_COUNT) return; if (system <= SYS_None) return; systems[system].coolant_level = std::min(1.0f, std::max(0.0f, coolant)); }
+    void setSystemCoolant(ESystem system, float coolant) { if (system >= SYS_COUNT) return; if (system <= SYS_None) return; systems[system].coolant_level = std::min(10.0f, std::max(0.0f, coolant)); }
 
     float getSystemRepair(ESystem system) { if (system >= SYS_COUNT) return 0.0; if (system <= SYS_None) return 0.0; return systems[system].repair_level; }
     void setSystemRepair(ESystem system, float repair) { if (system >= SYS_COUNT) return; if (system <= SYS_None) return; systems[system].repair_level = std::min(1.0f, std::max(0.0f, repair)); }
@@ -460,6 +460,7 @@ public:
         impulse_max_speed = forward_speed; 
         impulse_max_reverse_speed = reverse_speed.value_or(forward_speed);
     }
+    void setImpulseRequest(float request) { impulse_request = std::clamp(request, -1.0f, 1.0f); }
     float getSystemCoolantRate(ESystem system) const { if (system >= SYS_COUNT) return 0.f; if (system <= SYS_None) return 0.f; return systems[system].coolant_rate_per_second; }
     void setSystemCoolantRate(ESystem system, float rate) { if (system >= SYS_COUNT) return; if (system <= SYS_None) return; systems[system].coolant_rate_per_second = rate; }
     float getRotationMaxSpeed() { return turn_speed; }
