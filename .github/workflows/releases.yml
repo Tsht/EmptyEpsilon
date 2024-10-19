@@ -16,12 +16,12 @@ jobs:
           sudo apt update -qq
           sudo apt install build-essential cmake ninja-build zip unzip libsdl2-dev libfreetype6-dev
       - name: SeriousProton Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: tsht/SeriousProton
           path: SeriousProton  
       - name: EmptyEpsilon Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: EmptyEpsilon
       - name: Build
@@ -45,12 +45,12 @@ jobs:
           sudo apt update -qq
           sudo apt install build-essential cmake python3-minimal mingw-w64 ninja-build p7zip-full libfreetype6-dev
       - name: SeriousProton Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: tsht/SeriousProton
           path: SeriousProton  
       - name: EmptyEpsilon Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: EmptyEpsilon
       - name: Build
