@@ -48,7 +48,11 @@ function commsStationMainMenu(comms_source, comms_target)
             },
             service_cost = {
                 supplydrop = 100,
-                reinforcements = 150
+                reinforcements = 150,
+                phobos_reinforcement = 300,
+                amk3_reinforcement = 100,
+                hornet_reinforcement = 100,
+                amk8_reinforcement = 200,
             },
             reputation_cost_multipliers = {
                 friend = 1.0,
@@ -66,7 +70,7 @@ function commsStationMainMenu(comms_source, comms_target)
     end
 
     if comms_target:areEnemiesInRange(5000) then
-        setCommsMessage("We are under attack! No time for chatting!")
+        setCommsMessage(_("station-comms", "We are under attack! No time for chatting!"))
         return true
     end
     if not comms_source:isDocked(comms_target) then
@@ -83,27 +87,25 @@ end
 -- @tparam SpaceStation comms_target
 function commsStationDocked(comms_source, comms_target)
     local message
-
     if comms_source:isFriendly(comms_target) then
-        message = string.format("Good day, officer! Welcome to %s.\nWhat can we do for you today?", comms_target:getCallSign())
+        message = string.format(_("station-comms", "Good day, officer! Welcome to %s.\nWhat can we do for you today?"), comms_target:getCallSign())
     else
-        message = string.format("Welcome to our lovely station %s.", comms_target:getCallSign())
+        message = string.format(_("station-comms", "Welcome to our lovely station %s."), comms_target:getCallSign())
     end
-
-    setCommsMessage(string.format("%s\n\nReputation: %s", message, comms_source:getReputationPoints()))
+    setCommsMessage(message)
 
     local reply_messages = {
-        ["Homing"] = "Do you have spare homing missiles for us?",
-        ["HVLI"] = "Can you restock us with HVLI?",
-        ["Mine"] = "Please re-stock our mines.",
-        ["Nuke"] = "Can you supply us with some nukes?",
-        ["EMP"] = "Please re-stock our EMP missiles."
+        ["Homing"] = _("ammo-comms", "Do you have spare homing missiles for us?"),
+        ["HVLI"] = _("ammo-comms", "Can you restock us with HVLI?"),
+        ["Mine"] = _("ammo-comms", "Please re-stock our mines."),
+        ["Nuke"] = _("ammo-comms", "Can you supply us with some nukes?"),
+        ["EMP"] = _("ammo-comms", "Please re-stock our EMP missiles.")
     }
 
-    for _, missile_type in ipairs(MISSILE_TYPES) do
+    for idx, missile_type in ipairs(MISSILE_TYPES) do
         if comms_source:getWeaponStorageMax(missile_type) > 0 then
             addCommsReply(
-                string.format("%s (%d rep each)", reply_messages[missile_type], getWeaponCost(comms_source, comms_target, missile_type)),
+                string.format(_("ammo-comms", "%s (%d rep each)"), reply_messages[missile_type], getWeaponCost(comms_source, comms_target, missile_type)),
                 function(comms_source, comms_target)
                     handleWeaponRestock(comms_source, comms_target, missile_type)
                 end
@@ -119,18 +121,18 @@ end
 -- @tparam string weapon the missile type
 function handleWeaponRestock(comms_source, comms_target, weapon)
     if not comms_source:isDocked(comms_target) then
-        setCommsMessage("You need to stay docked for that action.")
+        setCommsMessage(_("station-comms", "You need to stay docked for that action."))
         return
     end
 
     if not isAllowedTo(comms_source, comms_target, comms_target.comms_data.weapons[weapon]) then
         local message
         if weapon == "Nuke" then
-            message = "We do not deal in weapons of mass destruction."
+            message = _("ammo-comms", "We do not deal in weapons of mass destruction.")
         elseif weapon == "EMP" then
-            message = "We do not deal in weapons of mass disruption."
+            message = _("ammo-comms", "We do not deal in weapons of mass disruption.")
         else
-            message = "We do not deal in those weapons."
+            message = _("ammo-comms", "We do not deal in those weapons.")
         end
         setCommsMessage(message)
         return
@@ -141,26 +143,26 @@ function handleWeaponRestock(comms_source, comms_target, weapon)
     if item_amount <= 0 then
         local message
         if weapon == "Nuke" then
-            message = "All nukes are charged and primed for destruction."
+            message = _("ammo-comms", "All nukes are charged and primed for destruction.")
         else
-            message = "Sorry, sir, but you are as fully stocked as I can allow."
+            message = _("ammo-comms", "Sorry, sir, but you are as fully stocked as I can allow.")
         end
         setCommsMessage(message)
-        addCommsReply("Back", commsStationMainMenu)
+        addCommsReply(_("Back"), commsStationMainMenu)
     else
         if not comms_source:takeReputationPoints(points_per_item * item_amount) then
-            setCommsMessage("Not enough reputation.")
+            setCommsMessage(_("needRep-comms", "Not enough reputation."))
             return
         end
         comms_source:setWeaponStorage(weapon, comms_source:getWeaponStorage(weapon) + item_amount)
         local message
         if comms_source:getWeaponStorage(weapon) == comms_source:getWeaponStorageMax(weapon) then
-            message = "You are fully loaded and ready to explode things."
+            message = _("ammo-comms", "You are fully loaded and ready to explode things.")
         else
-            message = "We generously resupplied you with some weapon charges.\nPut them to good use."
+            message = _("ammo-comms", "We generously resupplied you with some weapon charges.\nPut them to good use.")
         end
         setCommsMessage(message)
-        addCommsReply("Back", commsStationMainMenu)
+        addCommsReply(_("Back"), commsStationMainMenu)
     end
 end
 
@@ -170,19 +172,17 @@ end
 -- @tparam SpaceStation comms_target
 function commsStationUndocked(comms_source, comms_target)
     local message
-
     if comms_source:isFriendly(comms_target) then
-        message = string.format("This is %s. Good day, officer.\nIf you need supplies, please dock with us first.", comms_target:getCallSign())
+        message = string.format(_("station-comms", "This is %s. Good day, officer.\nIf you need supplies, please dock with us first."), comms_target:getCallSign())
     else
-        message = string.format("This is %s. Greetings.\nIf you want to do business, please dock with us first.", comms_target:getCallSign())
+        message = string.format(_("station-comms", "This is %s. Greetings.\nIf you want to do business, please dock with us first."), comms_target:getCallSign())
     end
-
-    setCommsMessage(string.format("%s\n\nReputation: %s", message, comms_source:getReputationPoints()))
+    setCommsMessage(message)
 
     -- supply drop
     if isAllowedTo(comms_source, comms_target, comms_target.comms_data.services.supplydrop) then
         addCommsReply(
-            string.format("Can you send a supply drop? (%d rep)", getServiceCost(comms_source, comms_target, "supplydrop")),
+            string.format(_("stationAssist-comms", "Can you send a supply drop? (%d rep)"), getServiceCost(comms_source, comms_target, "supplydrop")),
             --
             commsStationSupplyDrop
         )
@@ -191,7 +191,7 @@ function commsStationUndocked(comms_source, comms_target)
     -- reinforcements
     if isAllowedTo(comms_source, comms_target, comms_target.comms_data.services.reinforcements) then
         addCommsReply(
-            string.format("Please send reinforcements! (%d rep)", getServiceCost(comms_source, comms_target, "reinforcements")),
+            string.format(_("stationAssist-comms", "Please send reinforcements! (%d rep)"), getServiceCost(comms_source, comms_target, "reinforcements")),
             --
             commsStationReinforcements
         )
@@ -206,9 +206,9 @@ end
 -- @tparam SpaceStation comms_target
 function commsStationSupplyDrop(comms_source, comms_target)
     if comms_source:getWaypointCount() < 1 then
-        setCommsMessage("You need to set a waypoint before you can request backup.")
+        setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request backup."))
     else
-        setCommsMessage("To which waypoint should we deliver your supplies?")
+        setCommsMessage(_("stationAssist-comms", "To which waypoint should we deliver your supplies?"))
         for n = 1, comms_source:getWaypointCount() do
             addCommsReply(
                 formatWaypoint(n),
@@ -221,17 +221,17 @@ function commsStationSupplyDrop(comms_source, comms_target)
                         script:setVariable("position_x", position_x):setVariable("position_y", position_y)
                         script:setVariable("target_x", target_x):setVariable("target_y", target_y)
                         script:setVariable("faction_id", comms_target:getFactionId()):run("supply_drop.lua")
-                        message = string.format("We have dispatched a supply ship toward %s.", formatWaypoint(n))
+                        message = string.format(_("stationAssist-comms", "We have dispatched a supply ship toward %s."), formatWaypoint(n))
                     else
-                        message = "Not enough reputation!"
+                        message = _("needRep-comms", "Not enough reputation!")
                     end
                     setCommsMessage(message)
-                    addCommsReply("Back", commsStationMainMenu)
+                    addCommsReply(_("Back"), commsStationMainMenu)
                 end
             )
         end
     end
-    addCommsReply("Back", commsStationMainMenu)
+    addCommsReply(_("Back"), commsStationMainMenu)
 end
 
 --- Ask for a waypoint and send reinforcements to defend it.
@@ -239,28 +239,59 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 function commsStationReinforcements(comms_source, comms_target)
+	setCommsMessage(_("stationAssist-comms", "What kind of reinforcement ship would you like?"))
+	addCommsReply(string.format(_("stationAssist-comms", "Adder MK3 (%d rep)"), getServiceCost(comms_source, comms_target, "amk3_reinforcement")), function()
+		string.format("")
+		commsStationSpecificReinforcement(comms_source, comms_target, "amk3_reinforcement")
+	end)
+	addCommsReply(string.format(_("stationAssist-comms", "MU52 Hornet (%d rep)"), getServiceCost(comms_source, comms_target, "hornet_reinforcement")), function()
+		string.format("")
+		commsStationSpecificReinforcement(comms_source, comms_target, "hornet_reinforcement")
+	end)
+	addCommsReply(string.format(_("stationAssist-comms", "Standard Adder MK5 (%d rep)"), getServiceCost(comms_source, comms_target, "reinforcements")), function()
+		string.format("")
+		commsStationSpecificReinforcement(comms_source, comms_target, "reinforcements")
+	end)
+	addCommsReply(string.format(_("stationAssist-comms", "Adder MK8 (%d rep)"), getServiceCost(comms_source, comms_target, "amk8_reinforcement")), function()
+		string.format("")
+		commsStationSpecificReinforcement(comms_source, comms_target, "amk8_reinforcement")
+	end)
+	addCommsReply(string.format(_("stationAssist-comms", "Phobos T3 (%d rep)"), getServiceCost(comms_source, comms_target, "phobos_reinforcement")), function()
+		string.format("")
+		commsStationSpecificReinforcement(comms_source, comms_target, "phobos_reinforcement")
+	end)
+    addCommsReply(_("Back"), commsStationMainMenu)
+end
+function commsStationSpecificReinforcement(comms_source, comms_target, reinforcement_type)
     if comms_source:getWaypointCount() < 1 then
-        setCommsMessage("You need to set a waypoint before you can request reinforcements.")
+        setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
     else
-        setCommsMessage("To which waypoint should we dispatch the reinforcements?")
+        setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
         for n = 1, comms_source:getWaypointCount() do
             addCommsReply(
                 formatWaypoint(n),
                 function(comms_source, comms_target)
                     local message
-                    if comms_source:takeReputationPoints(getServiceCost(comms_source, comms_target, "reinforcements")) then
-                        local ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(comms_source:getWaypoint(n))
-                        message = string.format("We have dispatched %s to assist at %s.", ship:getCallSign(), formatWaypoint(n))
+                    if comms_source:takeReputationPoints(getServiceCost(comms_source, comms_target, reinforcement_type)) then
+                    	local reinforcement_template = {
+                    		["amk3_reinforcement"] = 	"Adder MK3",
+                    		["hornet_reinforcement"] =	"MU52 Hornet",
+                    		["reinforcements"] =		"Adder MK5",
+                    		["amk8_reinforcement"] =	"Adder MK8",
+                    		["phobos_reinforcement"] =	"Phobos T3",
+                    	}
+                        local ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate(reinforcement_template[reinforcement_type]):setScanned(true):orderDefendLocation(comms_source:getWaypoint(n))
+                        message = string.format(_("stationAssist-comms", "We have dispatched %s to assist at %s."), ship:getCallSign(), formatWaypoint(n))
                     else
-                        message = "Not enough reputation!"
+                        message = _("needRep-comms", "Not enough reputation!")
                     end
                     setCommsMessage(message)
-                    addCommsReply("Back", commsStationMainMenu)
+                    addCommsReply(_("Back"), commsStationMainMenu)
                 end
             )
         end
     end
-    addCommsReply("Back", commsStationMainMenu)
+    addCommsReply(_("Back"), commsStationMainMenu)
 end
 
 --- isAllowedTo
@@ -321,7 +352,7 @@ end
 -- @tparam integer i the index of the waypoint
 -- @treturn string "WP i"
 function formatWaypoint(i)
-    return string.format("WP %d", i)
+    return string.format(_("stationAssist-comms", "WP %d"), i)
 end
 
 -- `comms_source` and `comms_target` are global in comms script.

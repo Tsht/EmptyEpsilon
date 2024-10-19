@@ -97,19 +97,12 @@ SYS_JUMPDRIVE = "jumpdrive"
 SYS_FRONTSHIELD = "frontshield"
 --- `"rearshield"`
 SYS_REARSHIELD = "rearshield"
---- `"docks"`
-SYS_DOCKS = "docks"
---- `"drones"`
-SYS_DRONES = "drones"
---- `"hangar"`
-SYS_HANGAR = "hangar"
-
 
 --- Array of the system names.
 --
 -- @usage
 -- local pship = getPlayerShip(-1)
--- for _, system in ipairs(SYSTEMS) do
+-- for idx, system in ipairs(SYSTEMS) do
 --   pship:setSystemHealth(system, 1.0)
 --   pship:setSystemHeat(system, 0.0)
 --   pship:setSystemPower(system, 1.0)
@@ -126,10 +119,7 @@ SYSTEMS = {
   SYS_WARP,
   SYS_JUMPDRIVE,
   SYS_FRONTSHIELD,
-  SYS_REARSHIELD,
-  SYS_DOCKS,
-  SYS_DRONES,
-  SYS_HANGAR
+  SYS_REARSHIELD
 }
 
 --- Scanned states.

@@ -196,12 +196,12 @@ public:
         setDescriptions(description, description, description);
     }
 
-    void setDescriptions(string unscanned_description, string scanned_description, string full_scanned_description)
+    void setDescriptions(string unscanned_description, string scanned_description, std::optional<string> full_scanned_description)
     {
         object_description.not_scanned = unscanned_description;
         object_description.friend_of_foe_identified = unscanned_description;
         object_description.simple_scan = scanned_description;
-        object_description.full_scan = full_scanned_description;
+        object_description.full_scan = full_scanned_description.value_or(scanned_description);
     }
 
     string getDescriptionFor(P<SpaceObject> obj)

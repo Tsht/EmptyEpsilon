@@ -183,10 +183,12 @@ int main(int argc, char** argv)
         string mod = PreferencesManager::get("mod");
         if (getenv("HOME"))
         {
+            LOG(INFO) << "Using mod " << mod << " in directory " << string(getenv("HOME")) + "/.emptyepsilon/resources/mods/{resources,scripts,packs}" + mod;
             new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/mods/" + mod + "/resources/");
             new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/mods/" + mod + "/scripts/");
             PackResourceProvider::addPackResourcesForDirectory(string(getenv("HOME")) + "/.emptyepsilon/resources/mods/" + mod + "/packs/");
         }
+        LOG(INFO) << "Using mod " << mod << " in directory " << "resources/mods//{resources,scripts,packs}" + mod;
         new DirectoryResourceProvider("resources/mods/" + mod + "/resources/");
         new DirectoryResourceProvider("resources/mods/" + mod + "/scripts/");
         PackResourceProvider::addPackResourcesForDirectory("resources/mods/" + mod + "/packs/");

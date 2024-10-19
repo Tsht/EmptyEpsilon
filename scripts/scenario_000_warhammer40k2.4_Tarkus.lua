@@ -7,7 +7,7 @@
 --- Scenario
 -- @script scenario_basic_template
 
-require("../scripts_daid/utils.lua")
+require("utils.lua")
 require("utils_mars21.lua") --tsht toutes les fonctions necessaires pour mars
 -- For this scenario, utils.lua provides:
 --   vectorFromAngle(angle, length)

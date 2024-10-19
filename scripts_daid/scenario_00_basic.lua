@@ -23,9 +23,6 @@
 --- Scenario
 -- @script scenario_00_basic
 
---- Scenario
--- @script scenario_00_basic
-
 require("utils.lua")
 -- For this scenario, utils.lua provides:
 --   vectorFromAngle(angle, length)
@@ -36,9 +33,6 @@ require("utils.lua")
 --      Returns the distance between two objects/coordinates
 --   angleRotation(a, b, c, d)
 --      Returns the bearing between first object/coordinate and second object/coordinate. 
-
-require("ee.lua") --tsht for systems
-require("luax.lua") --tsht for table functions
 
 -- Global variables for this scenario
 local enemyList
@@ -266,7 +260,6 @@ function addGMPositionToggle()
     else
         name = name.._("buttonGM", "Random")
     end
-)
 
     addGMFunction(name, function()
         string.format("")   -- Provides global context for SeriousProton
@@ -294,21 +287,7 @@ function namedWaves()
             addWave(enemyList,index,randomWaveAngle(math.random(20), math.random(20)), randomWaveDistance(math.random(5)))
         end)
     end
-    
 end
-
-onNewPlayerShip(
-	function(pc)
-		pc.popWarpJammer = function()
-			popWarpJammer(pc)
-		end
-        pc:addInfos(11,"Nb Warpjam", "4")
-		popWarpJammerButton = "popWarpjammerButton"
-		pc:addCustomButton("Relay",popWarpJammerButton,string.format("Deployer antiwarp (%i)", tonumber(pc:getInfosValue(11))),pc.popWarpJammer)
-	end
-
-)
-
 
 --- Initialize scenario.
 function init()
@@ -483,6 +462,7 @@ function init()
             end
         end
     end
+
     BlackHole():setPosition(x, y)
     
     -- Spawn random neutral transports.
