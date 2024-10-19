@@ -4,12 +4,6 @@
 -- Type: Mission War40k
 -- test version git tagV2 
 ---
--- Type: Basic
--- Variation[Empty]: Places no enemies. Recommended for GM-controlled scenarios and rookie crew orientation. The scenario continues until the GM declares victory or all Human Navy craft are destroyed.
--- Variation[Easy]: Places fewer enemies. Recommended for inexperienced crews.
--- Variation[Hard]: Places more enemies. Recommended if you have multiple player-controlled ships.
--- Variation[Extreme]: Places many enemies. You're pretty surely overwhelmed.
-
 --- Scenario
 -- @script scenario_basic_template
 
