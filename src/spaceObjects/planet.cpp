@@ -123,15 +123,20 @@ REGISTER_SCRIPT_SUBCLASS(Planet, SpaceObject)
     REGISTER_SCRIPT_CLASS_FUNCTION(Planet, setPlanetAtmosphereColor);
     /// Sets this Planet's atmospheric effect texture.
     /// Valid values are filenames of PNG files relative to the resources/ directory.
+    /// Also sets icon : value of string = "default_icon.png"
     /// Optional; if defined, atmosphere textures should be transparent or translucent.
     /// For stars, you can set an atmosphere texture such as planets/star-1.png with no surface texture.
     /// Example: planet:setPlanetSurfaceTexture("planets/atmosphere.png")
     REGISTER_SCRIPT_CLASS_FUNCTION(Planet, setPlanetAtmosphereTexture);
     /// Sets this Planet's surface texture.
     /// Valid values are filenames of PNG files relative to the resources/ directory.
+    /// Also sets icon : value of string = "default_icon.png"
     /// Optional; if defined, surface textures should be opaque and use a 2:1-ratio equirectangular projection.
     /// Example: planet:setPlanetSurfaceTexture("planets/planet-1.png")
     REGISTER_SCRIPT_CLASS_FUNCTION(Planet, setPlanetSurfaceTexture);
+    /// Set this planet's icon on radar
+    /// This feature is not that well done, it's here to override default icon.
+    /// Example : planet:setPlanetIcon("planets/icons/17.png")
     REGISTER_SCRIPT_CLASS_FUNCTION(Planet, setPlanetIcon);
     REGISTER_SCRIPT_CLASS_FUNCTION(Planet, getPlanetSurfaceTexture);
     /// Sets this Planet's cloud layer effect texture, which rotates independently of the planet.
@@ -182,14 +187,17 @@ Planet::Planet()
     planet_size = 5000;
     cloud_size = 5200;
     planet_texture = "planets/2k_mercury.jpg";
-    planet_icon = "planets/icons/Storm-Planet.png";
+    planet_icon = "planets/icons/" + planet_texture.substr(planet_texture.find("/") + 1, planet_texture.rfind(".")) + "_default_icon.png";
+    
     cloud_texture = "";
     atmosphere_texture = "";
     atmosphere_size = 0;
     atmosphere_size = 0;
     distance_from_movement_plane = 0;
-    axial_rotation_time = random(100.0,400.0);
-    rotation_axis = random(0.0,360.0);
+    //axial_rotation_time = random(100.0,400.0);
+    //rotation_axis = random(0.0,360.0);
+    axial_rotation_time = 0;
+    rotation_axis = 0;
     orbit_target_id = -1;
     orbit_time = 0.0f;
     orbit_distance = 0.0f;
@@ -201,31 +209,31 @@ Planet::Planet()
 
     setRadarSignatureInfo(0.5f, 0.f, 0.3f);
 
-    addInfos(0,tr("Rotation"),string(irandom(5,45))+ " H.LO");
-    addInfos(1,tr("Revolution"),string(irandom(50,5000))+ " J.LO");
-    addInfos(2,tr("Rotation axis"),string(irandom(1,360))+"deg" + string(irandom(1,60))+"'" + string(irandom(1,60))+"''");
-    addInfos(3,tr("Size"),string(irandom(50,500) * 100) + " km");
-    if (random(0.f,1.f) < 0.1f)
-    {
-        addInfos(4,tr("Type"),tr("Gazeous"));
-    }
-    else
-    {
-        addInfos(4,tr("Type"),tr("Terestrial"));
-    }
-    addInfos(5,tr("Age"),string(irandom(5,100)*100)+ " M3 A.LO");
+    // addInfos(0,tr("Rotation"),string(irandom(5,45))+ " H.LO");
+    // addInfos(1,tr("Revolution"),string(irandom(50,5000))+ " J.LO");
+    // addInfos(2,tr("Rotation axis"),string(irandom(1,360))+"deg" + string(irandom(1,60))+"'" + string(irandom(1,60))+"''");
+    // addInfos(3,tr("Size"),string(irandom(50,500) * 100) + " km");
+    // if (random(0.f,1.f) < 0.1f)
+    // {
+    //     addInfos(4,tr("Type"),tr("Gazeous"));
+    // }
+    // else
+    // {
+    //     addInfos(4,tr("Type"),tr("Terestrial"));
+    // }
+    // addInfos(5,tr("Age"),string(irandom(5,100)*100)+ " M3 A.LO");
 
-    if (infos_value[4] == tr("Terestrial") && random(0.f,1.f) < 0.3f)
-    { 
-        addInfos(6,tr("Atmosphere"),tr("Yes"));
-    }
-    else
-    {
-        addInfos(6,tr("Atmosphere"),tr("No"));
-    }
-    addInfos(7,tr("Pressure"),string(random(0.1,4),1)+" Pa");
-    addInfos(8,tr("Gravity"),string(random(2.0,20.0),3)+" m/s2");
-    addInfos(9,tr("Main resource"),"");
+    // if (infos_value[4] == tr("Terestrial") && random(0.f,1.f) < 0.3f)
+    // { 
+    //     addInfos(6,tr("Atmosphere"),tr("Yes"));
+    // }
+    // else
+    // {
+    //     addInfos(6,tr("Atmosphere"),tr("No"));
+    // }
+    // addInfos(7,tr("Pressure"),string(random(0.1,4),1)+" Pa");
+    // addInfos(8,tr("Gravity"),string(random(2.0,20.0),3)+" m/s2");
+    // addInfos(9,tr("Main resource"),"");
 
     registerMemberReplication(&planet_size);
     registerMemberReplication(&cloud_size);
@@ -252,11 +260,18 @@ void Planet::setPlanetAtmosphereColor(float r, float g, float b)
 void Planet::setPlanetAtmosphereTexture(std::string_view texture_name)
 {
     atmosphere_texture = texture_name;
+    planet_icon = "planets/icons/" + atmosphere_texture.substr(atmosphere_texture.find("/") + 1, atmosphere_texture.rfind(".")) + "_default_icon.png"; //By default, set with setPlanetIcon after otherwise
+}
+
+string Planet::getPlanetAtmosphereTexture()
+{
+    return atmosphere_texture;
 }
 
 void Planet::setPlanetSurfaceTexture(std::string_view texture_name)
 {
     planet_texture = texture_name;
+    planet_icon = "planets/icons/" + planet_texture.substr(planet_texture.find("/") + 1, planet_texture.rfind(".")) + "_default_icon.png"; //By default, set with setPlanetIcon after otherwise
 }
 
 string Planet::getPlanetSurfaceTexture()
@@ -269,9 +284,19 @@ void Planet::setPlanetIcon(string texture_name)
     planet_icon = texture_name;
 }
 
+string Planet::getPlanetIcon()
+{
+    return planet_icon;
+}
+
 void Planet::setPlanetCloudTexture(std::string_view texture_name)
 {
     cloud_texture = texture_name;
+}
+
+string Planet::getPlanetCloudTexture()
+{
+    return cloud_texture;
 }
 
 float Planet::getPlanetRadius()

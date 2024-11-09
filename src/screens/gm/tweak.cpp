@@ -2177,30 +2177,70 @@ GuiShipTweakPlanet::GuiShipTweakPlanet(GuiContainer* owner)
 : GuiTweakPage(owner)
 {
     auto left_col = new GuiElement(this, "LEFT_LAYOUT");
-    left_col->setPosition(50, 25, sp::Alignment::TopLeft)->setSize(200, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    left_col->setPosition(50, 25, sp::Alignment::TopLeft)->setSize(600, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
 
-    auto center_col = new GuiElement(this, "CENTER_LAYOUT");
-    center_col->setPosition(0, 25, sp::Alignment::TopCenter)->setSize(200, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
-    auto right_col = new GuiElement(this, "RIGHT_LAYOUT");
-    right_col->setPosition(-25, 25, sp::Alignment::TopRight)->setSize(200, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
-    (new GuiLabel(left_col, "", "Texture", 30))->setSize(GuiElement::GuiSizeMax, 50);
-    texture_selector = new GuiSelector(left_col, "", [this](int index, string value)
+    (new GuiLabel(left_col, "", "Surface Texture (modifies icon)", 30))->setSize(GuiElement::GuiSizeMax, 50);
+    surface_texture_selector = new GuiSelector(left_col, "", [this](int index, string value)
     {
         if(target)
+        {
             target->setPlanetSurfaceTexture(value);
+            string icon = target->getPlanetIcon();
+            int id_icon = icon_selector->indexByValue(icon);
+            icon_selector->setSelectionIndex(id_icon);
+        }
     });
-    texture_selector->setPosition(0, 0, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, 50);
+    surface_texture_selector->setPosition(0, 0, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, 50);
 
-    std::vector<string> texture_filenames_jpg = findResources("planets/*.jpg");
-    std::sort(texture_filenames_jpg.begin(), texture_filenames_jpg.end());
-    std::vector<string> texture_filenames_png = findResources("planets/*.png");
-    std::sort(texture_filenames_png.begin(), texture_filenames_png.end());
-    for(string filename : texture_filenames_jpg)
-        texture_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
-    for(string filename : texture_filenames_png)
-        texture_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
+    (new GuiLabel(left_col, "", "Atmosphere Texture (modifies icon)", 30))->setSize(GuiElement::GuiSizeMax, 50);
+    atmosphere_texture_selector = new GuiSelector(left_col, "", [this](int index, string value)
+    {
+        if(target)
+        {
+            target->setPlanetAtmosphereTexture(value);
+            string icon = target->getPlanetIcon();
+            int id_icon = icon_selector->indexByValue(icon);
+            icon_selector->setSelectionIndex(id_icon);
+        }
+    });
+    atmosphere_texture_selector->setPosition(0, 0, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, 50);
+
+    (new GuiLabel(left_col, "", "Cloud Texture", 30))->setSize(GuiElement::GuiSizeMax, 50);
+    cloud_texture_selector = new GuiSelector(left_col, "", [this](int index, string value)
+    {
+        if(target)
+            target->setPlanetCloudTexture(value);
+    });
+    cloud_texture_selector->setPosition(0, 0, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, 50);
+
+    (new GuiLabel(left_col, "", "Icon on radar", 30))->setSize(GuiElement::GuiSizeMax, 50);
+    icon_selector = new GuiSelector(left_col, "", [this](int index, string value)
+    {
+        if(target)
+            target->setPlanetIcon(value);
+    });
+    icon_selector->setPosition(0, 0, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, 50);
+
+    std::vector<string> texture_filenames = findResources("planets/*.jpg");
+    std::vector<string> texture_filenames2 = findResources("planets/*.png");
+    texture_filenames.insert(texture_filenames.end(), texture_filenames2.begin(), texture_filenames2.end());
+    std::sort(texture_filenames.begin(), texture_filenames.end());
+    for(string filename : texture_filenames)
+    {
+        surface_texture_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
+        atmosphere_texture_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
+        cloud_texture_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
+    }
+
+    std::vector<string> icon_filenames = findResources("planets/icons/*.jpg");
+    std::vector<string> icon_filenames2 = findResources("planets/icons/*.png");
+    icon_filenames.insert(icon_filenames.end(), icon_filenames2.begin(), icon_filenames2.end());
+    std::sort(icon_filenames.begin(), icon_filenames.end());
+    for(string filename : icon_filenames)
+    {
+        icon_selector->addEntry(filename.substr(filename.rfind("/") + 1, filename.rfind(".")), filename);
+    }
+
 }
 
 void GuiShipTweakPlanet::onDraw(sp::RenderTarget& renderer)
@@ -2212,9 +2252,26 @@ void GuiShipTweakPlanet::open(P<SpaceObject> target)
 {
     P<Planet> planet = target;
     this->target = planet;
-    string texture = planet->getPlanetSurfaceTexture();
-    int id_texture = texture_selector->indexByValue(texture);
-    texture_selector->setSelectionIndex(id_texture);
+    {
+        string texture = planet->getPlanetSurfaceTexture();
+        int id_texture = surface_texture_selector->indexByValue(texture);
+        surface_texture_selector->setSelectionIndex(id_texture);
+    }
+    {
+        string texture = planet->getPlanetAtmosphereTexture();
+        int id_texture = atmosphere_texture_selector->indexByValue(texture);
+        atmosphere_texture_selector->setSelectionIndex(id_texture);
+    }
+    {
+        string texture = planet->getPlanetCloudTexture();
+        int id_texture = cloud_texture_selector->indexByValue(texture);
+        cloud_texture_selector->setSelectionIndex(id_texture);
+    }
+    {
+        string icon = planet->getPlanetIcon();
+        int id_icon = icon_selector->indexByValue(icon);
+        icon_selector->setSelectionIndex(id_icon);
+    }
 }
 
 GuiShipTweakInfos::GuiShipTweakInfos(GuiContainer* owner)

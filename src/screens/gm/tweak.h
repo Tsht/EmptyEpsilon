@@ -405,7 +405,10 @@ class GuiShipTweakPlanet : public GuiTweakPage
 {
 private:
     P<Planet> target;
-    GuiSelector* texture_selector;
+    GuiSelector* surface_texture_selector;
+    GuiSelector* atmosphere_texture_selector;
+    GuiSelector* cloud_texture_selector;
+    GuiSelector* icon_selector;
 
 public:
     GuiShipTweakPlanet(GuiContainer* owner);

@@ -28,10 +28,13 @@ public:
 
     void setPlanetAtmosphereColor(float r, float g, float b);
     void setPlanetAtmosphereTexture(std::string_view texture_name);
+    string getPlanetAtmosphereTexture();
     void setPlanetSurfaceTexture(std::string_view texture_name);
     string getPlanetSurfaceTexture();
     void setPlanetIcon(string texture_name); //TODO : check string view
+    string getPlanetIcon();
     void setPlanetCloudTexture(std::string_view texture_name);
+    string getPlanetCloudTexture();
     void setPlanetRadius(float size);
     void setPlanetCloudRadius(float size);
     void setPlanetAtmosphereRadius(float size);
