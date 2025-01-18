@@ -114,8 +114,8 @@ model:setRadius(200)
 --model:addEngineEmitter(-0.75, 0.2,-0.03,  0.5, 0.5, 1.0, 3.0)
 --model:addEngineEmitter(-0.75,-0.2,-0.03,  0.5, 0.5, 1.0, 3.0)
 
-model:addEngineEmitter(-8, -2.1500, 0.3,  1, 0.2, 0.2, 2.0)
-model:addEngineEmitter(-8,  2.1500, 0.3,  1, 0.2, 0.2, 2.0)
+model:addEngineEmitter(-6, -2.1500, 0.3,  1, 0.2, 0.2, 2.0)
+model:addEngineEmitter(-6,  2.1500, 0.3,  1, 0.2, 0.2, 2.0)
 
 --[[Croiseur leger Dauntless]]
 model = ModelData()
@@ -163,8 +163,8 @@ model:setRadius(220)
 
 --model:addEngineEmitter(-0.75, 0.2,-0.03,  0.5, 0.5, 1.0, 0.2)
 --model:addEngineEmitter(-0.75,-0.2,-0.03,  0.5, 0.5, 1.0, 0.2)
-model:addEngineEmitter(-20, -2.1500, 0.3,  1, 0.2, 0.2, 3.0)
-model:addEngineEmitter(-20,  2.1500, 0.3,  1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-20, -2.1500, -2,  1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-20,  2.1500, -2,  1, 0.2, 0.2, 3.0)
 
 
 --[[Croiseur Gothic]]
@@ -252,13 +252,17 @@ model:setRadius(350)
 
 --model:addEngineEmitter(-25, -2.1500, 0.3,  1.0, 0.2, 0.1, 3.0)
 --model:addEngineEmitter(-25,  2.1500, 0.3,  1.0, 0.2, 0.1, 3.0)
-model:addEngineEmitter(-20, -2.1500, 0.3,  1, 0.2, 0.2, 3.0)
-model:addEngineEmitter(-20,  2.1500, 0.3,  1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-21, -2.1500, -2,  1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-21,  2.1500, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-21, 0, -2, 1, 0.2, 0.2, 3.0)
+
 model:addBeamPosition(0,  0, 3)
 model:addBeamPosition(-16, 8, -8)
 model:addBeamPosition(-10, -8, -8)
 model:addBeamPosition(16, 8, -8)
 model:addBeamPosition(-10, -8, -8)
+
+--model:addEngineEmitter(-18, -2, -2, 1.0, 0.2, 0.1, 3.0)
 
 --1.0, 0.2, 0.1, 17.0)
 
@@ -340,6 +344,14 @@ model:setCollisionBox(2000, 600)
 
 --model:addEngineEmitter(-30, -30, 1.2,  1, 0.2, 0.2, 30.0)
 --model:addEngineEmitter(-30,  30, 1.2,  1, 0.2, 0.2, 30.0)
+model:addEngineEmitter(-18, -2, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, -4, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, -5, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, 2, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, 3, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, 4, -2, 1, 0.2, 0.2, 3.0)
+model:addEngineEmitter(-18, 5, -2, 1, 0.2, 0.2, 3.0)
+
 model:addBeamPosition(-10, -6, 0)
 model:addBeamPosition(10, -6, 0)
 model:addBeamPosition(0, -6, 0)
@@ -350,6 +362,8 @@ model:addBeamPosition(10, 6, 0)
 model:addBeamPosition(0, 6, 0)
 model:addBeamPosition(-20, 2, 0)
 model:addBeamPosition(20, 2, 0)
+
+
 
 --[[Arche Mechanicus]]
 model = ModelData()

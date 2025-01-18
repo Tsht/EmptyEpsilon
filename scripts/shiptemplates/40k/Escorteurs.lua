@@ -196,11 +196,10 @@ variation:setCustomWeaponMultiple("SEEKMK2",1,2)
 
 
 --[[Destroyer du chaos Iconoclast]] --a redeclarer 
-template = ShipTemplate():setName("Destroyer du chaos Iconoclast"):setClass("Destroyer", "Combat"):setModel("Navy_Destroyer")
+template = ShipTemplate():setName("Destroyer du chaos Iconoclast"):setClass("Destroyer", "Combat"):setModel("Chaos_Destroyer")
 template:setLocaleName("Destroyer du chaos Iconoclast")
-template:setModel("Chaos_Destroyer")
 --template:setRadarTrace("adv_striker.png")
-template:setRadarTrace("RadarArrow.png")
+--template:setRadarTrace("RadarArrow.png")
 template:setDescription([[Le Destroyer Iconoclast est un vaisseau de conception simple reprenant les principales caracteristiques des differents escorteurs utilises par les Libre-Marchands ou la Flotte Marchande, ce qui fait qu'il peut etre produit dans pratiquement n'importe quel Dock Orbital de la Galaxie.
 Le destroyer Iconoclast est redoute pour sa puissance de feu, important pour un vaisseau de cette taille, et constitue une menace permanente pour tous les vaisseaux navigants dans les immensite de l'espace, y compris pour les vaisseaux de ligne pouvant etre mis a mal par un escadron d'Iconoclast.]])
 
@@ -212,7 +211,7 @@ template:setSpeed(110, 12, 15)
 template:setBeam(0, 100, 90, 3000.0, 3, 12)
 template:setBeam(1, 100,-90, 3000.0, 3, 12)
 
-template:setCustomWeapon("homing", "chaosM", 1, 800.0, "Kinetic", 60)
+template:setCustomWeapon("homing", "chaosM", 1.5, 800.0, "Kinetic", 60)
 template:setCustomWeaponColor("chaosM", 255, 204, 0)
 template:setCustomWeaponStorage("chaosM", 300)
 template:setCustomWeaponMultiple("chaosM",1,2)
