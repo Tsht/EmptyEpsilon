@@ -699,14 +699,31 @@ template:setShields(650, 650)
 template:setSpeed(85, 9, 8)
 --template:setReverseSpeed(40,10)
 --                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 10, 0, 100.0, 30.0, 20)
-template:setBeam(1, 90, 90, 4500.0, 14.0, 35)
-template:setBeam(2, 90, -90, 4500.0, 14.0, 35)
-template:setBeam(3, 90, 90, 3000.0, 3, 9)
-template:setBeam(4, 90,-90, 3000.0, 3, 9)
-template:setBeam(5, 90, 90, 3000.0, 3, 9)
-template:setBeam(6, 90,-90, 3000.0, 3, 9)
+--template:setBeam(0, 10, 0, 100.0, 30.0, 20)
+--template:setBeam(1, 90, 90, 4500.0, 14.0, 35)
+--template:setBeam(2, 90, -90, 4500.0, 14.0, 35)
+--template:setBeam(3, 90, 90, 3000.0, 3, 9)
+--template:setBeam(4, 90,-90, 3000.0, 3, 9)
+--template:setBeam(5, 90, 90, 3000.0, 3, 9)
+--template:setBeam(6, 90,-90, 3000.0, 3, 9)
 template:setShortRangeRadarRange(7500)
+
+template:setBeamWeapon(1, 10, 90, 3000, 14, 35)
+template:setBeamWeaponTurret(1, 60, 90, 5)
+template:setBeamWeapon(2, 10, -90, 3000, 14, 18)
+template:setBeamWeaponTurret(2, 60, -90, 5)
+template:setBeamWeapon(3, 10, 90, 3000, 14, 35)
+template:setBeamWeaponTurret(3, 60, 90, 5)
+template:setBeamWeapon(4, 10, -90, 3000, 14, 18)
+template:setBeamWeaponTurret(4, 60, -90, 5)
+
+template:setBeamWeaponHeatPerFire(1, 0.01)
+
+template:setBeamWeaponHeatPerFire(2, 0.01)
+
+template:setBeamWeaponHeatPerFire(3, 0.01)
+
+template:setBeamWeaponHeatPerFire(4, 0.01)
 --                              Arc, Dir, Rotate speed
 
 --       Tubes
@@ -774,6 +791,8 @@ template:setTubeDirection(2, 90)
 template:setTubeDirection(3, -90)
 template:setTubeDirection(4, 90)
 template:setTubeDirection(5, -90)
+
+
 --MGAA Skyreaper (homing trés rapide) fregrate et plus
 template:setCustomWeapon("HVLI", "MCANMK2", 3, 1500.0, "Kinetic", 25)
 template:setCustomWeaponMultiple("MCANMK2",1,4)
@@ -1024,16 +1043,15 @@ template:setSystemDamageHullThreshold(0.80)
 template:setCombatManeuver(600, 250) -- si nerf, penser a donner une upgrade
 --                  Arc, Dir, Range, CycleTime, Dmg
 --template:setBeam(0, 45, 0, 100.0, 30.0, 10) -- a remplacer
-template:setBeam(1, 90, 90, 3000.0, 14.0, 30)
-template:setBeam(2, 90, -90, 3000.0, 14.0, 30)
-template:setBeam(3, 90, 90, 2000, 3, 11)
-template:setBeam(4, 90,-90, 2000, 3, 11) -- template mais pas variation 
-template:setBeam(5, 90, 90, 2000, 3, 11)
-template:setBeam(6, 90,-90, 2000, 3, 11)
+--template:setBeam(9, 90, 90, 2000, 3, 11)
+--template:setBeam(10, 90,-90, 2000, 3, 11) -- template mais pas variation 
+--template:setBeam(11, 90, 90, 2000, 3, 11)
+--template:setBeam(12, 90,-90, 2000, 3, 11)
 template:setBeamWeaponEnergyPerFire(1, 1)
 template:setBeamWeaponEnergyPerFire(2, 1)
 template:setBeamWeaponHeatPerFire(1, 0.01)
 template:setBeamWeaponHeatPerFire(2, 0.01)
+
 
 
 
@@ -1042,13 +1060,47 @@ template:setBeamWeaponHeatPerFire(2, 0.01)
 template:setBeamWeapon(0, 10, 0, 3000, 14, 45)
 template:setBeamWeaponTurret(0, 30, 0, 15)
 --Ajustement de la consommation d'énergie des tirs
-template:setBeamWeaponEnergyPerFire(0, 1)
 --Ajustement de la surchauffe engendrée par les tirs
 template:setBeamWeaponHeatPerFire(0, 0.01)
 template:setShortRangeRadarRange(7500)
 --template:setBeam(0, 30, 0, 4000.0, 30.0, 150)
 --exemple firestorm : template:setBeam(2,30, 0, 5000.0, 40.0, 200) 
 --200.0
+
+template:setBeamWeapon(1, 10, 90, 3000, 14, 12)
+template:setBeamWeaponTurret(1, 60, 90, 5)
+template:setBeamWeapon(2, 10, 90, 3000, 14, 12)
+template:setBeamWeaponTurret(2, 60, 90, 5)
+template:setBeamWeapon(3, 10, 90, 3000, 14, 12)
+template:setBeamWeaponTurret(3, 60, 90, 5)
+template:setBeamWeapon(4, 10, 90, 3000, 14, 12)
+template:setBeamWeaponTurret(4, 60, 90, 5)
+template:setBeamWeapon(5, 10, -90, 3000, 14, 12)
+template:setBeamWeaponTurret(5, 60, -90, 5)
+template:setBeamWeapon(6, 10, -90, 3000, 14, 12)
+template:setBeamWeaponTurret(6, 60, -90, 5)
+template:setBeamWeapon(7, 10, -90, 3000, 14, 12)
+template:setBeamWeaponTurret(7, 60, -90, 5)
+template:setBeamWeapon(8, 10, -90, 3000, 14, 12)
+template:setBeamWeaponTurret(8, 60, -90, 5)
+
+template:setBeamWeaponHeatPerFire(1, 0.01)
+
+template:setBeamWeaponHeatPerFire(2, 0.01)
+
+template:setBeamWeaponHeatPerFire(3, 0.01)
+
+template:setBeamWeaponHeatPerFire(4, 0.01)
+
+template:setBeamWeaponHeatPerFire(5, 0.01)
+
+template:setBeamWeaponHeatPerFire(6, 0.01)
+
+template:setBeamWeaponHeatPerFire(7, 0.01)
+
+template:setBeamWeaponHeatPerFire(8, 0.01)
+
+
 
 --template:setSystemDamageRatio(0.9)
 --template:setSystemDamageHullThreshold(0.85)
@@ -1158,12 +1210,14 @@ template:registerSquadronComposition("Int", 2, 45, "Intercepteur", "Intercepteur
 template:registerSquadronComposition("Bomb", 2, 80, "Bombardier Imperial Starhawk", "Chasseur","Chasseur","Chasseur")
 template:registerSquadronComposition("Cruis", 1, 300, "Croiseur leger Dauntless")
 
+
+template:setBlueprintAvailable("Ch")
+
 template:registerAmmoBlueprint("MCANMK3", 20)
 template:registerAmmoBlueprint("MAGMCAN", 60)
 template:registerAmmoBlueprint("SEEKMK2", 60)
 template:registerAmmoBlueprint("MAGSEEK", 80)
 
-template:setBlueprintAvailable("Ch")
 --Dock/balise de renfort de la marine
 
 --template:addDrones("Fregate sword",1)
