@@ -343,6 +343,11 @@ void GameMasterScreen::update(float delta)
     {
         Clipboard::setClipboard(getScriptExport(false));
     }
+    if (keys.spectator_show_callsigns.getDown())
+    {
+        // Toggle callsigns.
+        main_radar->showCallsigns(!main_radar->getCallsigns());
+    }
 
     if (keys.escape.getDown())
     {
